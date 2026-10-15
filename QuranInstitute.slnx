@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/docs/" />
+  <Folder Name="/src/">
+    <Project Path="QuranInstitute.Application/QuranInstitute.Application.csproj" />
+    <Project Path="QuranInstitute.Domain/QuranInstitute.Domain.csproj" />
+    <Project Path="QuranInstitute.Infrastructure/QuranInstitute.Infrastructure.csproj" />
+    <Project Path="QuranInstitute.Shared/QuranInstitute.Shared.csproj" />
+    <Project Path="QuranInstitute.Web/QuranInstitute.Web.csproj" />
+  </Folder>
+</Solution>
