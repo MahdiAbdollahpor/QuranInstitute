@@ -1,0 +1,111 @@
+﻿@model QuranInstitute.Web.ViewModels.Classes.ClassListViewModel
+@using QuranInstitute.Shared.Helpers
+@using QuranInstitute.Domain.Enums
+@{
+    ViewData["Title"] = "کلاس‌ها";
+}
+
+<div class="qi-card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h2>لیست کلاس‌ها (@Model.Classes.TotalCount کلاس)</h2>
+        <a href="/Admin/Classes/Create" class="qi-btn">+ تعریف کلاس جدید</a>
+    </div>
+
+    <form method="get" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;">
+        <input type="text" name="search" value="@Model.Search"
+               placeholder="جستجو (نام کلاس یا استاد)…"
+               style="flex:1; min-width:200px; padding:9px 12px; border:1px solid var(--qi-border); border-radius:8px; font-family:inherit;" />
+        <button type="submit" class="qi-btn">جستجو</button>
+        <a href="/Admin/Classes" class="qi-btn gray">پاک‌کردن</a>
+    </form>
+
+    @if (!Model.Classes.Items.Any())
+    {
+        <p style="color:var(--qi-text-muted); text-align:center; padding:30px;">
+            هنوز کلاسی تعریف نشده است.
+        </p>
+    }
+    else
+    {
+        <div style="overflow-x:auto;">
+            <table style="width:100%; border-collapse:collapse;">
+                <thead>
+                    <tr style="background:#eef3f2; font-size:13px;">
+                        <th style="padding:10px; text-align:right;">#</th>
+                        <th style="padding:10px; text-align:right;">نام کلاس</th>
+                        <th style="padding:10px; text-align:right;">استاد</th>
+                        <th style="padding:10px; text-align:right;">روزها</th>
+                        <th style="padding:10px; text-align:right;">ساعت</th>
+                        <th style="padding:10px; text-align:right;">نوع</th>
+                        <th style="padding:10px; text-align:right;">شاگردان</th>
+                        <th style="padding:10px; text-align:right;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        var idx = (Model.Classes.Page - 1) * Model.Classes.PageSize;
+                    }
+                    @foreach (var c in Model.Classes.Items)
+                    {
+                        idx++;
+                        var dayNames = new[] { "یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنجشنبه", "جمعه", "شنبه" };
+                        var dayStr = string.Join("، ", c.Days.Select(d => dayNames[d]));
+                        var typeStr = c.Type switch
+                        {
+                            ClassType.InPerson => "حضوری",
+                            ClassType.Online => "مجازی",
+                            ClassType.Hybrid => "ترکیبی",
+                            _ => "—"
+                        };
+                        var typeColor = c.Type switch
+                        {
+                            ClassType.InPerson => "#0f766e",
+                            ClassType.Online => "#1d4ed8",
+                            ClassType.Hybrid => "#b45309",
+                            _ => "#6b7280"
+                        };
+
+                        <tr style="border-bottom:1px solid #e5eae9;">
+                            <td style="padding:10px;">@idx.ToPersianDigits()</td>
+                            <td style="padding:10px;"><strong>@c.Name</strong></td>
+                            <td style="padding:10px;">@c.TeacherName</td>
+                            <td style="padding:10px; font-size:13px;">@dayStr</td>
+                            <td style="padding:10px;">@(c.ClassTime ?? "—")</td>
+                            <td style="padding:10px;">
+                                <span style="background:@typeColor; color:#fff; padding:3px 10px;
+                                                     border-radius:20px; font-size:12px;">
+                                    @typeStr
+                                </span>
+                            </td>
+                            <td style="padding:10px;">
+                                @c.StudentCount.ToPersianDigits() / @c.Capacity.ToPersianDigits()
+                            </td>
+                            <td style="padding:10px; white-space:nowrap;">
+                                <a href="/Admin/Classes/Edit/@c.Id" class="qi-btn sm">ویرایش</a>
+                                <form method="post" action="/Admin/Classes/Deactivate/@c.Id"
+                                      style="display:inline;"
+                                      onsubmit="return confirm('آیا از غیرفعال‌سازی این کلاس مطمئن هستید؟');">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="qi-btn sm red">غیرفعال</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (Model.Classes.TotalPages > 1)
+        {
+            <div style="display:flex; gap:6px; justify-content:center; margin-top:20px;">
+                @for (int i = 1; i <= Model.Classes.TotalPages; i++)
+                {
+                    <a href="?page=@i&search=@Model.Search"
+                       class="qi-btn sm @(i == Model.Classes.Page ? "" : "gray")">
+                        @i.ToPersianDigits()
+                    </a>
+                }
+            </div>
+        }
+    }
+</div>

@@ -1,0 +1,15 @@
+﻿@model QuranInstitute.Web.ViewModels.Students.CreateStudentViewModel
+@{
+    ViewData["Title"] = "ثبت شاگرد جدید";
+    ViewBag.SubmitLabel = "ثبت شاگرد";
+    ViewBag.FormAction = "/Admin/Students/Create";
+}
+
+<div class="qi-card">
+    <h2>ثبت شاگرد جدید</h2>
+    <partial name="_StudentForm" model="Model" />
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

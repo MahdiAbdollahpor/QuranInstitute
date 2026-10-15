@@ -1,0 +1,15 @@
+﻿@model QuranInstitute.Web.ViewModels.Classes.CreateClassViewModel
+@{
+    ViewData["Title"] = "تعریف کلاس جدید";
+    ViewBag.SubmitLabel = "ثبت کلاس";
+    ViewBag.FormAction = "/Admin/Classes/Create";
+}
+
+<div class="qi-card">
+    <h2>تعریف کلاس جدید</h2>
+    <partial name="_ClassForm" model="Model" />
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

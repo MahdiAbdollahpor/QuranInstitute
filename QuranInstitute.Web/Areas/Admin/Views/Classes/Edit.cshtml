@@ -1,0 +1,15 @@
+﻿@model QuranInstitute.Web.ViewModels.Classes.EditClassViewModel
+@{
+    ViewData["Title"] = "ویرایش کلاس";
+    ViewBag.SubmitLabel = "ذخیره تغییرات";
+    ViewBag.FormAction = "/Admin/Classes/Edit";
+}
+
+<div class="qi-card">
+    <h2>ویرایش کلاس</h2>
+    <partial name="_ClassForm" model="Model" />
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

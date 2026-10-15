@@ -30,6 +30,24 @@
         </div>
     </div>
 
+    @if (TempData["Success"] != null)
+    {
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                qiToast('@Html.Raw(TempData["Success"])', 'success');
+            });
+        </script>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                qiToast('@Html.Raw(TempData["Error"])', 'danger');
+            });
+        </script>
+    }
+
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

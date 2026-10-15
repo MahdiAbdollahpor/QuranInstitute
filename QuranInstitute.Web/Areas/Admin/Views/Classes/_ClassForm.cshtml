@@ -1,0 +1,118 @@
+﻿@model QuranInstitute.Web.ViewModels.Classes.BaseClassFormViewModel
+@using QuranInstitute.Domain.Enums
+@{
+    var submitLabel = (string?)ViewBag.SubmitLabel ?? "ذخیره";
+    var formAction = (string?)ViewBag.FormAction ?? "";
+    var showOnlineLink = Model.Type == ClassType.Online || Model.Type == ClassType.Hybrid;
+}
+
+<form method="post" action="@formAction" novalidate>
+    @Html.AntiForgeryToken()
+
+    @if (!ViewData.ModelState.IsValid && ViewData.ModelState[""]?.Errors.Count > 0)
+    {
+        <div style="background:#fef2f2; border:1px solid #fecaca; color:#b91c1c;
+                        padding:10px 14px; border-radius:8px; margin-bottom:16px; font-size:13px;">
+            @ViewData.ModelState[""]!.Errors.First().ErrorMessage
+        </div>
+    }
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:16px;">
+
+        <div>
+            <label asp-for="Name" style="display:block; font-size:13px; margin-bottom:6px; color:#4b5563;">
+                نام کلاس <span style="color:#b91c1c;">*</span>
+            </label>
+            <input asp-for="Name" type="text"
+                   style="width:100%; padding:9px 12px; border:1px solid var(--qi-border); border-radius:8px; font-family:inherit;" />
+            <span asp-validation-for="Name" style="color:#b91c1c; font-size:12px;"></span>
+        </div>
+
+        <div>
+            <label asp-for="TeacherName" style="display:block; font-size:13px; margin-bottom:6px; color:#4b5563;">
+                استاد <span style="color:#b91c1c;">*</span>
+            </label>
+            <input asp-for="TeacherName" type="text"
+                   style="width:100%; padding:9px 12px; border:1px solid var(--qi-border); border-radius:8px; font-family:inherit;" />
+            <span asp-validation-for="TeacherName" style="color:#b91c1c; font-size:12px;"></span>
+        </div>
+
+        <div>
+            <label asp-for="ClassTime" style="display:block; font-size:13px; margin-bottom:6px; color:#4b5563;">
+                ساعت کلاس
+            </label>
+            <input asp-for="ClassTime" type="text" placeholder="مثلاً ۱۶:۰۰ تا ۱۷:۳۰"
+                   style="width:100%; padding:9px 12px; border:1px solid var(--qi-border); border-radius:8px; font-family:inherit;" />
+        </div>
+
+        <div>
+            <label asp-for="Type" style="display:block; font-size:13px; margin-bottom:6px; color:#4b5563;">
+                نوع کلاس
+            </label>
+            <select asp-for="Type" asp-items="Model.TypeOptions" id="classType"
+                    style="width:100%; padding:9px 12px; border:1px solid var(--qi-border); border-radius:8px; font-family:inherit;">
+            </select>
+        </div>
+
+        <div>
+            <label asp-for="Capacity" style="display:block; font-size:13px; margin-bottom:6px; color:#4b5563;">
+                ظرفیت
+            </label>
+            <input asp-for="Capacity" type="number" min="1" max="500"
+                   style="width:100%; padding:9px 12px; border:1px solid var(--qi-border); border-radius:8px; font-family:inherit;" />
+            <span asp-validation-for="Capacity" style="color:#b91c1c; font-size:12px;"></span>
+        </div>
+
+        <div style="grid-column:1/-1;" id="onlineLinkWrapper">
+            <label asp-for="DefaultOnlineLink" style="display:block; font-size:13px; margin-bottom:6px; color:#4b5563;">
+                لینک کلاس آنلاین (برای کلاس‌های مجازی/ترکیبی)
+            </label>
+            <input asp-for="DefaultOnlineLink" type="url" dir="ltr"
+                   placeholder="https://..."
+                   style="width:100%; padding:9px 12px; border:1px solid var(--qi-border); border-radius:8px; font-family:inherit;" />
+            <span asp-validation-for="DefaultOnlineLink" style="color:#b91c1c; font-size:12px;"></span>
+        </div>
+
+        <div style="grid-column:1/-1;">
+            <label style="display:block; font-size:13px; margin-bottom:8px; color:#4b5563;">
+                روزهای برگزاری <span style="color:#b91c1c;">*</span>
+            </label>
+            <div style="display:flex; flex-wrap:wrap; gap:12px;">
+                @foreach (var day in Model.DayOptions)
+                {
+                    var isChecked = Model.SelectedDays.Contains(int.Parse(day.Value));
+                    <label style="display:inline-flex; align-items:center; gap:6px; cursor:pointer;
+                                      background:#f3f6f5; padding:8px 14px; border-radius:8px;
+                                      border:1px solid @(isChecked ? "#0f766e" : "#d6dedc");">
+                        <input type="checkbox" name="SelectedDays" value="@day.Value"
+                               @(isChecked ? "checked" : "") />
+                        <span>@day.Text</span>
+                    </label>
+                }
+            </div>
+            <span asp-validation-for="SelectedDays" style="color:#b91c1c; font-size:12px;"></span>
+        </div>
+    </div>
+
+    <div style="margin-top:24px; display:flex; gap:10px;">
+        <button type="submit" class="qi-btn">@submitLabel</button>
+        <a href="/Admin/Classes" class="qi-btn gray">انصراف</a>
+    </div>
+</form>
+
+<script>
+    // مخفی/نمایش لینک آنلاین بر اساس نوع کلاس
+    (function () {
+        const typeSelect = document.getElementById('classType');
+        const wrapper = document.getElementById('onlineLinkWrapper');
+        if (!typeSelect || !wrapper) return;
+
+        function update() {
+            const v = parseInt(typeSelect.value);
+            // ClassType.Online = 2, Hybrid = 3
+            wrapper.style.display = (v === 2 || v === 3) ? '' : 'none';
+        }
+        typeSelect.addEventListener('change', update);
+        update();
+    })();
+</script>
