@@ -1,4 +1,16 @@
-﻿// Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
+﻿// ═══════════════════════════════════════════
+// Toast helper
+// ═══════════════════════════════════════════
+window.qiToast = function (message, type = 'default', duration = 3000) {
+    const el = document.createElement('div');
+    el.className = `qi-toast ${type}`;
+    el.textContent = message;
+    document.body.appendChild(el);
 
-// Write your JavaScript code.
+    requestAnimationFrame(() => el.classList.add('show'));
+
+    setTimeout(() => {
+        el.classList.remove('show');
+        setTimeout(() => el.remove(), 300);
+    }, duration);
+};

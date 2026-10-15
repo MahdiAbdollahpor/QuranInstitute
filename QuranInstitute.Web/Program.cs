@@ -7,17 +7,17 @@ using QuranInstitute.Infrastructure.Persistence.Seed;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ─── لایه‌ها ────────────────────────────────────────
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
-// ─── Identity ───────────────────────────────────────
+// ─── Identity ────────────────────────────────────────
 builder.Services
     .AddIdentity<AppUser, AppRole>(opt =>
     {
         opt.Password.RequiredLength = 6;
         opt.Password.RequireDigit = true;
         opt.Password.RequireUppercase = false;
+        opt.Password.RequireLowercase = false;
         opt.Password.RequireNonAlphanumeric = false;
 
         opt.User.RequireUniqueEmail = false;
@@ -36,15 +36,13 @@ builder.Services.ConfigureApplicationCookie(opt =>
     opt.ExpireTimeSpan = TimeSpan.FromDays(14);
     opt.SlidingExpiration = true;
     opt.Cookie.Name = "QuranInstitute.Auth";
+    opt.Cookie.HttpOnly = true;
 });
 
-// ─── MVC ────────────────────────────────────────────
 builder.Services.AddControllersWithViews();
-builder.Services.AddRazorPages();
 
 var app = builder.Build();
 
-// ─── Seeder ─────────────────────────────────────────
 using (var scope = app.Services.CreateScope())
 {
     try
@@ -54,11 +52,10 @@ using (var scope = app.Services.CreateScope())
     catch (Exception ex)
     {
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "خطا در Seeder هنگام راه‌اندازی");
+        logger.LogError(ex, "خطا در Seeder");
     }
 }
 
-// ─── Pipeline ───────────────────────────────────────
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -68,7 +65,8 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
-app.UseAuthentication();
+
+app.UseAuthentication();   // ★ مهم: قبل از Authorization
 app.UseAuthorization();
 
 app.MapControllerRoute(

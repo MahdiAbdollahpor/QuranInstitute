@@ -1,0 +1,50 @@
+﻿@model QuranInstitute.Web.ViewModels.Account.LoginViewModel
+@{
+    Layout = "_LoginLayout";
+    ViewData["Title"] = "ورود";
+}
+
+<div class="login-wrapper">
+    <div class="login-card">
+        <div class="login-logo">
+            <div style="font-size:48px;">🕌</div>
+            <h1>موسسه قرآنی</h1>
+            <p>ورود به سامانه مدیریت</p>
+        </div>
+
+        <form asp-action="Login" method="post" asp-route-returnUrl="@Model.ReturnUrl">
+            @Html.AntiForgeryToken()
+
+            @if (!ViewData.ModelState.IsValid && ViewData.ModelState[""]?.Errors.Count > 0)
+            {
+                <div class="alert-error">
+                    @ViewData.ModelState[""]!.Errors.First().ErrorMessage
+                </div>
+            }
+
+            <div class="form-group">
+                <label asp-for="Mobile"></label>
+                <input asp-for="Mobile" type="text" inputmode="numeric"
+                       placeholder="09123456789" autocomplete="username" />
+                <span asp-validation-for="Mobile" class="validation-error"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Password"></label>
+                <input asp-for="Password" type="password" autocomplete="current-password" />
+                <span asp-validation-for="Password" class="validation-error"></span>
+            </div>
+
+            <div class="remember-row">
+                <input asp-for="RememberMe" type="checkbox" />
+                <label asp-for="RememberMe" style="margin:0;"></label>
+            </div>
+
+            <button type="submit" class="btn-login">ورود</button>
+        </form>
+
+        <p style="text-align:center; color:#6b7280; font-size:12px; margin-top:20px;">
+            برای دریافت دسترسی، با مدیر موسسه تماس بگیرید.
+        </p>
+    </div>
+</div>

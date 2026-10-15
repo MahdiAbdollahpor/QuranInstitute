@@ -22,9 +22,9 @@ public class ClassResourceConfiguration : IEntityTypeConfiguration<ClassResource
          .OnDelete(DeleteBehavior.Cascade);
 
         b.HasOne(x => x.Session)
-         .WithMany(s => s.Resources)
-         .HasForeignKey(x => x.SessionId)
-         .OnDelete(DeleteBehavior.SetNull);
+ .WithMany(s => s.Resources)
+ .HasForeignKey(x => x.SessionId)
+ .OnDelete(DeleteBehavior.NoAction);
 
         b.HasIndex(x => x.ClassId);
         b.HasIndex(x => x.Type);

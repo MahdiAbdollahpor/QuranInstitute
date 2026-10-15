@@ -1,32 +1,26 @@
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using QuranInstitute.Web.Models;
-using System.Diagnostics;
+using QuranInstitute.Domain.Constants;
 
-namespace QuranInstitute.Web.Controllers
+namespace QuranInstitute.Web.Controllers;
+
+public class HomeController : Controller
 {
-    public class HomeController : Controller
+    [AllowAnonymous]
+    public IActionResult Index()
     {
-        private readonly ILogger<HomeController> _logger;
-
-        public HomeController(ILogger<HomeController> logger)
+        if (User.Identity?.IsAuthenticated == true)
         {
-            _logger = logger;
+            if (User.IsInRole(Roles.Admin) || User.IsInRole(Roles.Teacher))
+                return RedirectToAction("Index", "Dashboard", new { area = "Admin" });
+
+            return RedirectToAction("Index", "Dashboard", new { area = "User" });
         }
 
-        public IActionResult Index()
-        {
-            return View();
-        }
-
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        }
+        // فعلاً صفحه لاگین
+        return RedirectToAction("Login", "Account");
     }
+
+    [AllowAnonymous]
+    public IActionResult Error() => View();
 }

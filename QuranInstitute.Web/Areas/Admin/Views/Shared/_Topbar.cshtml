@@ -1,0 +1,19 @@
+﻿<header class="admin-topbar">
+    <button id="sidebarToggle" class="qi-btn sm" style="display:none;">☰</button>
+
+    <h1>@ViewData["Title"]</h1>
+
+    <div class="admin-user">
+        <span>@User.Identity?.Name</span>
+        <form method="post" action="/Account/Logout" style="display:inline;">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="logout-btn">خروج</button>
+        </form>
+    </div>
+</header>
+
+<style>
+    @@media (max-width: 900px) {
+        #sidebarToggle { display: inline-block !important; }
+    }
+</style>

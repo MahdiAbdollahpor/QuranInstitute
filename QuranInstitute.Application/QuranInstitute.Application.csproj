@@ -22,4 +22,9 @@
     <ProjectReference Include="..\QuranInstitute.Shared\QuranInstitute.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Features\Students\Commands\" />
+    <Folder Include="Features\Students\Mappings\" />
+  </ItemGroup>
+
 </Project>
