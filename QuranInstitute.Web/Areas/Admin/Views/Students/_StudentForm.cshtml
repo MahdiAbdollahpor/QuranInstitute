@@ -7,6 +7,9 @@
 <form method="post" action="@formAction" novalidate>
     @Html.AntiForgeryToken()
 
+    @* ★★★ این خط حیاتی است برای Edit *@
+    <input type="hidden" asp-for="Id" />
+
     @if (!ViewData.ModelState.IsValid && ViewData.ModelState[""]?.Errors.Count > 0)
     {
         <div style="background:#fef2f2; border:1px solid #fecaca; color:#b91c1c;

@@ -5,6 +5,7 @@ namespace QuranInstitute.Web.ViewModels.Students;
 
 public abstract class BaseStudentFormViewModel
 {
+    public Guid Id { get; set; }
     [Required(ErrorMessage = "نام شاگرد الزامی است.")]
     [Display(Name = "نام و نام خانوادگی")]
     public string Name { get; set; } = string.Empty;

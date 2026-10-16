@@ -5,7 +5,5 @@ namespace QuranInstitute.Web.ViewModels.Students;
 
 public class EditStudentViewModel : BaseStudentFormViewModel
 {
-    public Guid Id { get; set; }
-
  
 }

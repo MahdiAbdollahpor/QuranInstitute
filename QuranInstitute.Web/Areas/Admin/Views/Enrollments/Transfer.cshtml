@@ -1,0 +1,49 @@
+﻿@model QuranInstitute.Web.ViewModels.Enrollments.TransferStudentViewModel
+@{
+    ViewData["Title"] = "انتقال شاگرد";
+}
+
+<div class="qi-card">
+    <h2>انتقال شاگرد به کلاس دیگر</h2>
+
+    <form method="post" action="/Admin/Enrollments/Transfer">
+        @Html.AntiForgeryToken()
+
+        @if (!ViewData.ModelState.IsValid && ViewData.ModelState[""]?.Errors.Count > 0)
+        {
+            <div style="background:#fef2f2; border:1px solid #fecaca; color:#b91c1c;
+                            padding:10px 14px; border-radius:8px; margin-bottom:16px; font-size:13px;">
+                @ViewData.ModelState[""]!.Errors.First().ErrorMessage
+            </div>
+        }
+
+        <input type="hidden" asp-for="StudentId" />
+        <input type="hidden" asp-for="FromClassId" />
+
+        <div style="margin-bottom:16px;">
+            <label style="display:block; font-size:13px; margin-bottom:6px; color:#4b5563;">
+                کلاس مبدأ
+            </label>
+            <input type="text" value="@Model.FromClassName" readonly
+                   style="width:100%; padding:9px 12px; border:1px solid var(--qi-border);
+                          border-radius:8px; font-family:inherit; background:#f3f6f5;" />
+        </div>
+
+        <div style="margin-bottom:16px;">
+            <label asp-for="ToClassId" style="display:block; font-size:13px; margin-bottom:6px; color:#4b5563;">
+                کلاس مقصد <span style="color:#b91c1c;">*</span>
+            </label>
+            <select asp-for="ToClassId" asp-items="Model.AvailableClasses"
+                    style="width:100%; padding:9px 12px; border:1px solid var(--qi-border);
+                           border-radius:8px; font-family:inherit;">
+                <option value="">— انتخاب کنید —</option>
+            </select>
+            <span asp-validation-for="ToClassId" style="color:#b91c1c; font-size:12px;"></span>
+        </div>
+
+        <div style="display:flex; gap:10px;">
+            <button type="submit" class="qi-btn">انتقال</button>
+            <a href="/Admin/Enrollments" class="qi-btn gray">انصراف</a>
+        </div>
+    </form>
+</div>

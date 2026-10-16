@@ -4,10 +4,17 @@
     var submitLabel = (string?)ViewBag.SubmitLabel ?? "ذخیره";
     var formAction = (string?)ViewBag.FormAction ?? "";
     var showOnlineLink = Model.Type == ClassType.Online || Model.Type == ClassType.Hybrid;
+    var idValue = (Model as QuranInstitute.Web.ViewModels.Classes.EditClassViewModel)?.Id;
 }
 
 <form method="post" action="@formAction" novalidate>
     @Html.AntiForgeryToken()
+
+    @* ★★★ hidden input برای Id در حالت ویرایش *@
+    @if (idValue.HasValue && idValue.Value != Guid.Empty)
+    {
+        <input type="hidden" name="Id" value="@idValue.Value" />
+    }
 
     @if (!ViewData.ModelState.IsValid && ViewData.ModelState[""]?.Errors.Count > 0)
     {

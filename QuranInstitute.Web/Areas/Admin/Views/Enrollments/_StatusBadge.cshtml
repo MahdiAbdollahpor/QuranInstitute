@@ -1,0 +1,14 @@
+﻿@model QuranInstitute.Domain.Enums.EnrollmentStatus
+@{
+    var (text, bg) = Model switch
+    {
+        QuranInstitute.Domain.Enums.EnrollmentStatus.Pending => ("در انتظار", "#b45309"),
+        QuranInstitute.Domain.Enums.EnrollmentStatus.Approved => ("تأییدشده", "#16a34a"),
+        QuranInstitute.Domain.Enums.EnrollmentStatus.Rejected => ("ردشده", "#b91c1c"),
+        QuranInstitute.Domain.Enums.EnrollmentStatus.Canceled => ("لغوشده", "#6b7280"),
+        _ => ("—", "#6b7280")
+    };
+}
+<span style="background:@bg; color:#fff; padding:3px 10px; border-radius:20px; font-size:12px;">
+    @text
+</span>

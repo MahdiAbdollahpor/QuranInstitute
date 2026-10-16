@@ -1,0 +1,130 @@
+﻿@model QuranInstitute.Web.ViewModels.Enrollments.EnrollmentListViewModel
+@using QuranInstitute.Shared.Helpers
+@using QuranInstitute.Domain.Enums
+@{
+    ViewData["Title"] = "ثبت‌نام‌ها";
+}
+
+<div class="qi-card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h2>لیست ثبت‌نام‌ها (@Model.Enrollments.TotalCount مورد)</h2>
+    </div>
+
+    <form method="get" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;">
+        <input type="text" name="search" value="@Model.Search"
+               placeholder="جستجو (نام شاگرد، موبایل، کلاس)…"
+               style="flex:1; min-width:200px; padding:9px 12px; border:1px solid var(--qi-border); border-radius:8px; font-family:inherit;" />
+
+        <select name="classId"
+                style="padding:9px 12px; border:1px solid var(--qi-border); border-radius:8px; font-family:inherit; min-width:180px;">
+            <option value="">همه کلاس‌ها</option>
+            @foreach (var c in Model.Classes)
+            {
+                <option value="@c.Value" selected="@(c.Selected)">@c.Text</option>
+            }
+        </select>
+
+        <select name="status"
+                style="padding:9px 12px; border:1px solid var(--qi-border); border-radius:8px; font-family:inherit; min-width:150px;">
+            @foreach (var s in Model.StatusOptions)
+            {
+                <option value="@s.Value" selected="@(s.Selected)">@s.Text</option>
+            }
+        </select>
+
+        <button type="submit" class="qi-btn">فیلتر</button>
+        <a href="/Admin/Enrollments" class="qi-btn gray">پاک‌کردن</a>
+    </form>
+
+    @if (!Model.Enrollments.Items.Any())
+    {
+        <p style="color:var(--qi-text-muted); text-align:center; padding:30px;">
+            هیچ ثبت‌نامی یافت نشد.
+        </p>
+    }
+    else
+    {
+        <div style="overflow-x:auto;">
+            <table style="width:100%; border-collapse:collapse;">
+                <thead>
+                    <tr style="background:#eef3f2; font-size:13px;">
+                        <th style="padding:10px; text-align:right;">#</th>
+                        <th style="padding:10px; text-align:right;">شاگرد</th>
+                        <th style="padding:10px; text-align:right;">موبایل ولی</th>
+                        <th style="padding:10px; text-align:right;">کلاس</th>
+                        <th style="padding:10px; text-align:right;">وضعیت</th>
+                        <th style="padding:10px; text-align:right;">تاریخ درخواست</th>
+                        <th style="padding:10px; text-align:right;">عملیات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        var idx = (Model.Enrollments.Page - 1) * Model.Enrollments.PageSize;
+                        var currentUrl = Context.Request.Path + Context.Request.QueryString;
+                    }
+                    @foreach (var e in Model.Enrollments.Items)
+                    {
+                        idx++;
+                        <tr style="border-bottom:1px solid #e5eae9;">
+                            <td style="padding:10px;">@idx.ToPersianDigits()</td>
+                            <td style="padding:10px;"><strong>@e.StudentName</strong></td>
+                            <td style="padding:10px; direction:ltr; text-align:right;">
+                                @e.ParentMobile.ToPersianDigits()
+                            </td>
+                            <td style="padding:10px;">@e.ClassName</td>
+                            <td style="padding:10px;">
+                                <partial name="_StatusBadge" model="e.Status" />
+                            </td>
+                            <td style="padding:10px; font-size:13px;">
+                                @e.RequestedAt.GetShamsiDateFromGregorian(time: false).ToPersianDigits()
+                            </td>
+                            <td style="padding:10px; white-space:nowrap;">
+                                @if (e.Status == EnrollmentStatus.Pending)
+                                {
+                                    <form method="post" action="/Admin/Enrollments/Approve/@e.Id"
+                                          style="display:inline;">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="returnUrl" value="@currentUrl" />
+                                        <button type="submit" class="qi-btn sm green">تأیید</button>
+                                    </form>
+                                    <form method="post" action="/Admin/Enrollments/Reject/@e.Id"
+                                          style="display:inline;"
+                                          onsubmit="return confirm('این ثبت‌نام رد شود؟');">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="returnUrl" value="@currentUrl" />
+                                        <button type="submit" class="qi-btn sm red">رد</button>
+                                    </form>
+                                }
+                                @if (e.Status == EnrollmentStatus.Approved)
+                                {
+                                    <a href="/Admin/Enrollments/Transfer?studentId=@e.StudentId&fromClassId=@e.ClassId"
+                                       class="qi-btn sm blue">انتقال</a>
+                                    <form method="post" action="/Admin/Enrollments/Cancel/@e.Id"
+                                          style="display:inline;"
+                                          onsubmit="return confirm('ثبت‌نام لغو شود؟');">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="returnUrl" value="@currentUrl" />
+                                        <button type="submit" class="qi-btn sm gray">لغو</button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (Model.Enrollments.TotalPages > 1)
+        {
+            <div style="display:flex; gap:6px; justify-content:center; margin-top:20px;">
+                @for (int i = 1; i <= Model.Enrollments.TotalPages; i++)
+                {
+                    <a href="?page=@i&search=@Model.Search&classId=@Model.ClassId&status=@((int?)Model.Status)"
+                       class="qi-btn sm @(i == Model.Enrollments.Page ? "" : "gray")">
+                        @i.ToPersianDigits()
+                    </a>
+                }
+            </div>
+        }
+    }
+</div>

@@ -1,0 +1,76 @@
+﻿@model QuranInstitute.Web.ViewModels.Enrollments.ClassStudentsViewModel
+@using QuranInstitute.Shared.Helpers
+@{
+    ViewData["Title"] = $"شاگردان کلاس {Model.Data.ClassName}";
+}
+
+<div class="qi-card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <div>
+            <h2 style="margin:0 0 4px;">@Model.Data.ClassName</h2>
+            <small style="color:var(--qi-text-muted);">استاد: @Model.Data.TeacherName</small>
+        </div>
+        <div style="font-size:14px;">
+            <span style="color:var(--qi-text-muted);">ظرفیت:</span>
+            <b>@Model.Data.StudentCount.ToPersianDigits() / @Model.Data.Capacity.ToPersianDigits()</b>
+        </div>
+    </div>
+
+    <div style="display:flex; gap:10px; margin-bottom:16px;">
+        <a href="/Admin/Enrollments" class="qi-btn gray">بازگشت به لیست ثبت‌نام‌ها</a>
+        <a href="/Admin/Classes/Edit/@Model.Data.ClassId" class="qi-btn blue">ویرایش کلاس</a>
+    </div>
+
+    @if (!Model.Data.Students.Any())
+    {
+        <p style="color:var(--qi-text-muted); text-align:center; padding:30px;">
+            هنوز شاگردی در این کلاس ثبت‌نام نشده است.
+        </p>
+    }
+    else
+    {
+        <div style="overflow-x:auto;">
+            <table style="width:100%; border-collapse:collapse;">
+                <thead>
+                    <tr style="background:#eef3f2; font-size:13px;">
+                        <th style="padding:10px; text-align:right;">#</th>
+                        <th style="padding:10px; text-align:right;">نام شاگرد</th>
+                        <th style="padding:10px; text-align:right;">نام ولی</th>
+                        <th style="padding:10px; text-align:right;">موبایل</th>
+                        <th style="padding:10px; text-align:right;">شهریه ماهانه</th>
+                        <th style="padding:10px; text-align:right;">شروع</th>
+                        <th style="padding:10px; text-align:right;">عملیات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        var idx = 0;
+                    }
+                    @foreach (var s in Model.Data.Students)
+                    {
+                        idx++;
+                        <tr style="border-bottom:1px solid #e5eae9;">
+                            <td style="padding:10px;">@idx.ToPersianDigits()</td>
+                            <td style="padding:10px;"><strong>@s.Name</strong></td>
+                            <td style="padding:10px;">@s.ParentName</td>
+                            <td style="padding:10px; direction:ltr; text-align:right;">
+                                @s.ParentMobile.ToPersianDigits()
+                            </td>
+                            <td style="padding:10px;">
+                                @s.MonthlyFee.ToString("N0").ToPersianDigits() تومان
+                            </td>
+                            <td style="padding:10px; font-size:13px;">
+                                @s.StartDate.GetShamsiDateFromGregorian(time: false).ToPersianDigits()
+                            </td>
+                            <td style="padding:10px; white-space:nowrap;">
+                                <a href="/Admin/Students/Edit/@s.StudentId" class="qi-btn sm">مشاهده</a>
+                                <a href="/Admin/Enrollments/Transfer?studentId=@s.StudentId&fromClassId=@Model.Data.ClassId"
+                                   class="qi-btn sm blue">انتقال</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
