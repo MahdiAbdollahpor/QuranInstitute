@@ -1,4 +1,5 @@
-﻿@model QuranInstitute.Web.ViewModels.Students.BaseStudentFormViewModel
+﻿@using QuranInstitute.Shared.Helpers
+@model QuranInstitute.Web.ViewModels.Students.BaseStudentFormViewModel
 @{
     var submitLabel = (string?)ViewBag.SubmitLabel ?? "ذخیره";
     var formAction = (string?)ViewBag.FormAction ?? "";
@@ -71,8 +72,22 @@
             <label asp-for="StartDate" style="display:block; font-size:13px; margin-bottom:6px; color:#4b5563;">
                 تاریخ شروع شهریه
             </label>
-            <input asp-for="StartDate" type="date"
-                   style="width:100%; padding:9px 12px; border:1px solid var(--qi-border); border-radius:8px; font-family:inherit;" />
+
+            <input type="text"
+                   class="persian-date-input"
+                   data-target="StartDate_hidden"
+                   placeholder="1403/08/12"
+                   value="@Model.StartDate.GetShamsiDateFromGregorian(time: false)"
+                   autocomplete="off"
+                   inputmode="numeric"
+                   dir="ltr"
+                   style="width:100%; padding:9px 12px; border:1px solid var(--qi-border); border-radius:8px; font-family:inherit; text-align:left;" />
+
+            <input type="hidden"
+                   name="StartDate"
+                   id="StartDate_hidden"
+                   value="@Model.StartDate.ToString("yyyy-MM-dd")" />
+
             <span asp-validation-for="StartDate" style="color:#b91c1c; font-size:12px;"></span>
         </div>
 

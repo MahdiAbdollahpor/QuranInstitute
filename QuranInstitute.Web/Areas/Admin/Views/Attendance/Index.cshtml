@@ -1,0 +1,229 @@
+﻿@model QuranInstitute.Web.ViewModels.Attendances.AttendanceFormViewModel
+@using QuranInstitute.Shared.Helpers
+@using QuranInstitute.Domain.Enums
+@{
+    ViewData["Title"] = "حضور و غیاب";
+    var dayNames = new[] { "یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنجشنبه", "جمعه", "شنبه" };
+    var persianDate = Model.Date.GetShamsiDateFromGregorian(time: false).ToPersianDigits();
+    var wdName = dayNames[(int)Model.Date.DayOfWeek];
+    var isoDate = Model.Date.ToString("yyyy-MM-dd");
+}
+
+<div class="qi-card">
+    <h2>ثبت حضور و غیاب</h2>
+
+    <form method="get" action="/Admin/Attendance/Index"
+          style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px; align-items:end;">
+        <div>
+            <label style="display:block; font-size:13px; margin-bottom:6px; color:#4b5563;">
+                کلاس
+            </label>
+            <select name="classId"
+                    style="padding:9px 12px; border:1px solid var(--qi-border); border-radius:8px; font-family:inherit; min-width:200px;">
+                @foreach (var c in Model.Classes)
+                {
+                    <option value="@c.Value" selected="@(c.Selected)">@c.Text</option>
+                }
+            </select>
+        </div>
+
+        <div>
+            <label style="display:block; font-size:13px; margin-bottom:6px; color:#4b5563;">
+                تاریخ
+            </label>
+
+            <input type="text"
+                   class="persian-date-input"
+                   data-target="attFilterDateHidden"
+                   placeholder="1403/08/12"
+                   value="@Model.Date.GetShamsiDateFromGregorian(time: false)"
+                   autocomplete="off"
+                   inputmode="numeric"
+                   dir="ltr"
+                   style="padding:9px 12px; border:1px solid var(--qi-border); border-radius:8px; font-family:inherit; min-width:140px; text-align:left;" />
+
+            <input type="hidden" name="date" id="attFilterDateHidden" value="@isoDate" />
+        </div>
+
+        <button type="submit" class="qi-btn">نمایش</button>
+
+        <a href="/Admin/Attendance?classId=@Model.ClassId&date=@DateTime.Today.ToString("yyyy-MM-dd")"
+           class="qi-btn gray">امروز</a>
+    </form>
+
+    @if (!Model.Entries.Any())
+    {
+        <p style="color:var(--qi-text-muted); text-align:center; padding:30px;">
+            این کلاس شاگردی ندارد. ابتدا در بخش ثبت‌نام‌ها شاگرد اضافه کنید.
+        </p>
+    }
+    else
+    {
+        @* ─── اطلاعات جلسه ─── *@
+        <div style="background:#eef3f2; padding:14px 18px; border-radius:10px; margin-bottom:16px;">
+            <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+                <div>
+                    <strong>@Model.ClassName</strong>
+                    <span style="color:var(--qi-text-muted);">— استاد: @Model.TeacherName</span>
+                </div>
+                <div style="font-size:13px;">
+                    <span style="color:var(--qi-text-muted);">تاریخ جلسه:</span>
+                    <b>@wdName @persianDate</b>
+
+                    @if (Model.AlreadyRecorded)
+                    {
+                        <span style="background:#16a34a; color:#fff; padding:3px 10px;
+                                             border-radius:20px; font-size:12px; margin-right:8px;">
+                            ✅ قبلاً ثبت شده
+                        </span>
+                    }
+                    else
+                    {
+                        <span style="background:#b45309; color:#fff; padding:3px 10px;
+                                             border-radius:20px; font-size:12px; margin-right:8px;">
+                            ⏳ هنوز ثبت نشده
+                        </span>
+                    }
+                </div>
+            </div>
+
+            @if (!Model.IsClassDay)
+            {
+                <p style="color:#b45309; font-size:13px; margin-top:8px;">
+                    ⚠️ توجه: @wdName جزو روزهای این کلاس نیست. با این حال می‌توانید حضور و غیاب ثبت کنید.
+                </p>
+            }
+        </div>
+
+        @* ─── فرم ثبت ─── *@
+        <form method="post" action="/Admin/Attendance/Save" id="attForm">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="classId" value="@Model.ClassId" />
+            <input type="hidden" name="date" value="@isoDate" />
+
+            <div style="display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap;">
+                <button type="button" class="qi-btn green" onclick="markAll('Present')">
+                    ✅ همه حاضر
+                </button>
+                <button type="submit" class="qi-btn">💾 ذخیره</button>
+            </div>
+
+            <div style="overflow-x:auto;">
+                <table style="width:100%; border-collapse:collapse;">
+                    <thead>
+                        <tr style="background:#eef3f2; font-size:13px;">
+                            <th style="padding:10px; text-align:right;">#</th>
+                            <th style="padding:10px; text-align:right;">نام شاگرد</th>
+                            <th style="padding:10px; text-align:right;">موبایل ولی</th>
+                            <th style="padding:10px; text-align:right; min-width:280px;">وضعیت</th>
+                            <th style="padding:10px; text-align:right;">توضیحات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            var idx = 0;
+                        }
+                        @foreach (var s in Model.Entries)
+                        {
+                            idx++;
+                            var current = s.Status?.ToString() ?? "";
+                            <tr style="border-bottom:1px solid #e5eae9;">
+                                <td style="padding:10px;">@idx.ToPersianDigits()</td>
+                                <td style="padding:10px;"><strong>@s.StudentName</strong></td>
+                                <td style="padding:10px; direction:ltr; text-align:right;">
+                                    @s.ParentMobile.ToPersianDigits()
+                                </td>
+                                <td style="padding:10px;">
+                                    <input type="hidden" name="studentIds" value="@s.StudentId" />
+
+                                    @* مخفی: مقدار وضعیت فعلی *@
+                                    <input type="hidden" name="statuses" value="@current"
+                                           id="status_@s.StudentId" />
+
+                                    <div class="att-seg" data-student="@s.StudentId">
+                                        @foreach (var (val, label, color) in new[]
+                                                                        {
+                                                                ("Present", "حاضر",   "#16a34a"),
+                                                                ("Absent",  "غایب",   "#b91c1c"),
+                                                                ("Late",    "تأخیر",  "#b45309"),
+                                                                ("Excused", "موجه",   "#1d4ed8")
+                                                                })
+                                        {
+                                            var isOn = current == val;
+                                            <button type="button"
+                                                    class="att-btn"
+                                                    data-val="@val"
+                                                    style="padding:5px 12px; font-size:13px; font-family:inherit;
+                                                                       border:1px solid #c5cfcc; background:@(isOn? color : "#fff");
+                                                                       color:@(isOn ? "#fff" : "#374151");
+                                                                       cursor:pointer; margin-left:2px;">
+                                                @label
+                                            </button>
+                                        }
+                                    </div>
+                                </td>
+                                <td style="padding:10px;">
+                                    <input type="text" name="notes" value="@s.Note"
+                                           placeholder="..."
+                                           style="width:100%; min-width:120px; padding:6px 8px;
+                                                          border:1px solid var(--qi-border); border-radius:6px; font-family:inherit; font-size:13px;" />
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="margin-top:16px; display:flex; gap:10px;">
+                <button type="submit" class="qi-btn">💾 ذخیره تغییرات</button>
+                <a href="/Admin/Attendance?classId=@Model.ClassId&date=@isoDate" class="qi-btn gray">بازنشانی</a>
+            </div>
+        </form>
+
+        @* فرم جدا برای همه-حاضر *@
+        <form method="post" action="/Admin/Attendance/MarkAllPresent" id="markAllForm" style="display:none;">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="classId" value="@Model.ClassId" />
+            <input type="hidden" name="date" value="@isoDate" />
+        </form>
+
+        <script>
+            (function () {
+                // دکمه‌های انتخاب وضعیت
+                document.querySelectorAll('.att-seg').forEach(seg => {
+                    const studentId = seg.dataset.student;
+                    const hidden = document.getElementById('status_' + studentId);
+
+                    seg.querySelectorAll('.att-btn').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            const val = btn.dataset.val;
+                            hidden.value = val;
+
+                            // رنگ همه دکمه‌ها را ریست کن
+                            seg.querySelectorAll('.att-btn').forEach(b => {
+                                b.style.background = '#fff';
+                                b.style.color = '#374151';
+                            });
+
+                            // دکمه انتخاب‌شده را رنگی کن
+                            const colors = {
+                                Present: '#16a34a',
+                                Absent:  '#b91c1c',
+                                Late:    '#b45309',
+                                Excused: '#1d4ed8'
+                            };
+                            btn.style.background = colors[val];
+                            btn.style.color = '#fff';
+                        });
+                    });
+                });
+            })();
+
+            function markAll(status) {
+                if (confirm('همه شاگردان حاضر ثبت شوند؟')) {
+                    document.getElementById('markAllForm').submit();
+                }
+            }
+        </script>
+    }
+</div>

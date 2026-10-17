@@ -1,0 +1,107 @@
+﻿/* ═══════════════════════════════════════════
+   سفارشی‌سازی تقویم شمسی برای هماهنگی با پالت سایت
+   ═══════════════════════════════════════════ */
+
+.datepicker-plot-area {
+    font-family: 'Vazirmatn', Tahoma, sans-serif !important;
+    direction: rtl !important;
+    border-radius: 12px !important;
+    border: 1px solid #d6dedc !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,.12) !important;
+    padding: 8px !important;
+    z-index: 9999 !important;
+}
+
+    /* ─── هدر تقویم (ماه/سال + دکمه‌ها) ─── */
+    .datepicker-plot-area .datepicker-header {
+        background: #f3f6f5 !important;
+        border-radius: 8px !important;
+        padding: 6px !important;
+        margin-bottom: 6px !important;
+    }
+
+        .datepicker-plot-area .datepicker-header .btn-next,
+        .datepicker-plot-area .datepicker-header .btn-prev {
+            color: #0f766e !important;
+            font-weight: 700 !important;
+        }
+
+            .datepicker-plot-area .datepicker-header .btn-next:hover,
+            .datepicker-plot-area .datepicker-header .btn-prev:hover {
+                color: #115e59 !important;
+            }
+
+    /* ─── ماه و سال قابل کلیک ─── */
+    .datepicker-plot-area .datepicker-navigator {
+        color: #115e59 !important;
+        font-weight: 600 !important;
+    }
+
+        .datepicker-plot-area .datepicker-navigator:hover {
+            background: #e6f4f1 !important;
+            border-radius: 6px !important;
+        }
+
+    /* ─── نام روزهای هفته ─── */
+    .datepicker-plot-area .datepicker-day-view .table-days td {
+        padding: 4px !important;
+        font-size: 13px !important;
+    }
+
+    .datepicker-plot-area .datepicker-day-view .table-days th {
+        color: #6b7280 !important;
+        font-weight: 500 !important;
+        font-size: 12px !important;
+    }
+
+    /* ─── روزها ─── */
+    .datepicker-plot-area .datepicker-day-view .table-days td span {
+        width: 30px !important;
+        height: 30px !important;
+        line-height: 30px !important;
+        border-radius: 8px !important;
+        transition: all .15s !important;
+        font-size: 13px !important;
+    }
+
+    /* هاور روی روز */
+    .datepicker-plot-area .datepicker-day-view .table-days td:hover span {
+        background: #e6f4f1 !important;
+        color: #0f766e !important;
+    }
+
+    /* روز انتخاب‌شده */
+    .datepicker-plot-area .datepicker-day-view .table-days td.selected span {
+        background: #0f766e !important;
+        color: #fff !important;
+        font-weight: 700 !important;
+    }
+
+    /* روز جاری */
+    .datepicker-plot-area .datepicker-day-view .table-days td.today span {
+        border: 1px solid #0f766e !important;
+        color: #0f766e !important;
+    }
+
+    /* روزهای غیرفعال */
+    .datepicker-plot-area .datepicker-day-view .table-days td.disabled span {
+        color: #d1d5db !important;
+    }
+
+    /* ─── دکمه امروز ─── */
+    .datepicker-plot-area .datepicker-day-view .datepicker-footer {
+        background: #f3f6f5 !important;
+        border-radius: 8px !important;
+        margin-top: 6px !important;
+    }
+
+        .datepicker-plot-area .datepicker-day-view .datepicker-footer .btn-today {
+            color: #0f766e !important;
+            font-weight: 600 !important;
+            font-size: 13px !important;
+        }
+
+            .datepicker-plot-area .datepicker-day-view .datepicker-footer .btn-today:hover {
+                background: #e6f4f1 !important;
+                border-radius: 6px !important;
+            }

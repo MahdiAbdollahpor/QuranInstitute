@@ -1,39 +1,50 @@
-﻿@using QuranInstitute.Shared.Helpers
+﻿@using QuranInstitute.Application.Features.Tuition.Queries.GetMonthlyIncome
+@using QuranInstitute.Shared.Helpers
 @{
-    ViewData["Title"] = "داشبورد";
+    var income = ViewBag.Income as MonthlyIncomeDto;
 }
 
-<div class="qi-card">
-    <h2>خوش آمدید 👋</h2>
-    <p>این پنل مدیریت موسسه قرآنی است. از منوی کنار، بخش مورد نظر را انتخاب کنید.</p>
-</div>
+<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px,1fr)); gap:16px; margin-bottom:16px;">
+    <div class="qi-card">
+        <div style="color:#6b7280; font-size:12px;">دریافتی ماه جاری</div>
+        <div style="font-size:22px; color:#16a34a; font-weight:700; margin-top:6px;">
+            @((income?.TotalIncome ?? 0).ToString("N0").ToPersianDigits()) تومان
+        </div>
+        <div style="color:#6b7280; font-size:12px; margin-top:4px;">
+            @((income?.PaymentCount ?? 0).ToPersianDigits()) پرداخت
+        </div>
+    </div>
 
-<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px,1fr)); gap:16px;">
     <div class="qi-card">
-        <div style="color:#6b7280; font-size:12px;">شاگردان</div>
-        <div style="font-size:24px; color:#0f766e; font-weight:700; margin-top:6px;">۰</div>
+        <div style="color:#6b7280; font-size:12px;">تعداد بدهکاران</div>
+        <div style="font-size:22px; color:#b91c1c; font-weight:700; margin-top:6px;">
+            @(((int)(ViewBag.DebtorsCount ?? 0)).ToPersianDigits()) نفر
+        </div>
+        <div style="color:#6b7280; font-size:12px; margin-top:4px;">
+            <a href="/Admin/Tuition">مشاهده لیست →</a>
+        </div>
     </div>
+
     <div class="qi-card">
-        <div style="color:#6b7280; font-size:12px;">کلاس‌ها</div>
-        <div style="font-size:24px; color:#0f766e; font-weight:700; margin-top:6px;">۰</div>
+        <div style="color:#6b7280; font-size:12px;">ثبت‌نام‌های معلق</div>
+        <div style="font-size:22px; color:#b45309; font-weight:700; margin-top:6px;">
+            @(((int)(ViewBag.PendingCount ?? 0)).ToPersianDigits()) مورد
+        </div>
+        <div style="color:#6b7280; font-size:12px; margin-top:4px;">
+            <a href="/Admin/Enrollments?status=1">بررسی →</a>
+        </div>
     </div>
+
     <div class="qi-card">
-        <div style="color:#6b7280; font-size:12px;">دریافتی این ماه</div>
-        <div style="font-size:24px; color:#0f766e; font-weight:700; margin-top:6px;">۰ تومان</div>
-    </div>
-    <div class="qi-card">
-        <div style="color:#6b7280; font-size:12px;">بدهی‌ها</div>
-        <div style="font-size:24px; color:#b91c1c; font-weight:700; margin-top:6px;">۰ تومان</div>
+        <div style="color:#6b7280; font-size:12px;">غایبین امروز</div>
+        <div style="font-size:22px; color:#b91c1c; font-weight:700; margin-top:6px;">
+            @{
+                var absCount = (ViewBag.Absentees as List<QuranInstitute.Application.Features.Attendances.Queries.GetTodayAbsentees.TodaysAbsenteeDto>)?.Count ?? 0;
+            }
+            @absCount.ToPersianDigits() نفر
+        </div>
+        <div style="color:#6b7280; font-size:12px; margin-top:4px;">
+            <a href="/Admin/Attendance">حضور و غیاب →</a>
+        </div>
     </div>
 </div>
-
-@if ((int)(ViewBag.PendingCount ?? 0) > 0)
-{
-    <div class="qi-card" style="background:#fef3c7; border-color:#f59e0b;">
-        <h2 style="color:#92400e;">⏳ ثبت‌نام‌های در انتظار تأیید</h2>
-        <p>
-            <b>@(((int)ViewBag.PendingCount).ToPersianDigits())</b> ثبت‌نام در انتظار بررسی است.
-        </p>
-        <a href="/Admin/Enrollments?status=1" class="qi-btn">مشاهده و بررسی</a>
-    </div>
-}

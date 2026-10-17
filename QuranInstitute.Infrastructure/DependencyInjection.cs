@@ -2,10 +2,12 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using QuranInstitute.Application.Common.Interfaces;
+using QuranInstitute.Application.Features.Tuition.Services;
 using QuranInstitute.Infrastructure.Persistence.Context;
 using QuranInstitute.Infrastructure.Services;
 using QuranInstitute.Infrastructure.Services.FileStorage;
 using QuranInstitute.Infrastructure.Services.Sms;
+using QuranInstitute.Infrastructure.Services.Tuition;
 using QuranInstitute.Infrastructure.Services.WhatsApp;
 
 namespace QuranInstitute.Infrastructure;
@@ -31,6 +33,7 @@ public static class DependencyInjection
 
         services.AddHttpContextAccessor();
 
+        services.AddScoped<ITuitionCalculator, TuitionCalculator>();
         services.AddScoped<IDateTimeService, DateTimeService>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
         services.AddScoped<IFileStorageService, LocalFileStorageService>();

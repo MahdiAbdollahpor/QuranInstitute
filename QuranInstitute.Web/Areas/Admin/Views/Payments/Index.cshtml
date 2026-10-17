@@ -1,0 +1,222 @@
+﻿@model QuranInstitute.Web.ViewModels.Payments.PaymentListViewModel
+@using QuranInstitute.Shared.Helpers
+@using QuranInstitute.Domain.Enums
+@{
+    ViewData["Title"] = "پرداخت‌ها";
+
+    var methodNames = new Dictionary<PaymentMethod, string>
+    {
+        { PaymentMethod.Cash, "نقدی" },
+        { PaymentMethod.Card, "کارت به کارت" },
+        { PaymentMethod.Online, "آنلاین" },
+        { PaymentMethod.Other, "سایر" }
+    };
+    var methodColors = new Dictionary<PaymentMethod, string>
+    {
+        { PaymentMethod.Cash, "#16a34a" },
+        { PaymentMethod.Card, "#1d4ed8" },
+        { PaymentMethod.Online, "#0f766e" },
+        { PaymentMethod.Other, "#6b7280" }
+    };
+}
+
+@* ─── فرم ثبت پرداخت سریع ─── *@
+<div class="qi-card" style="background:#f0fdf4; border-color:#bbf7d0;">
+    <h2 style="color:#166534;">💰 ثبت پرداخت جدید</h2>
+
+    <form method="post" action="/Admin/Payments/Create" novalidate
+          style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px; align-items:end;">
+        @Html.AntiForgeryToken()
+
+        <div>
+            <label style="display:block; font-size:13px; margin-bottom:6px; color:#4b5563;">
+                شاگرد <span style="color:#b91c1c;">*</span>
+            </label>
+            <select asp-for="Form.StudentId" asp-items="Model.Form.Students"
+                    style="width:100%; padding:9px 12px; border:1px solid var(--qi-border);
+                           border-radius:8px; font-family:inherit;">
+                <option value="">— انتخاب کنید —</option>
+            </select>
+        </div>
+
+        <div>
+            <label style="display:block; font-size:13px; margin-bottom:6px; color:#4b5563;">
+                مبلغ (تومان) <span style="color:#b91c1c;">*</span>
+            </label>
+            <input asp-for="Form.Amount" type="number" min="1000" step="1000"
+                   style="width:100%; padding:9px 12px; border:1px solid var(--qi-border);
+                          border-radius:8px; font-family:inherit;" />
+        </div>
+
+        <div>
+            <label style="display:block; font-size:13px; margin-bottom:6px; color:#4b5563;">
+                تاریخ
+            </label>
+
+            <input type="text"
+                   class="persian-date-input"
+                   data-target="Form_Date_hidden"
+                   placeholder="1403/08/12"
+                   value="@DateTime.Today.GetShamsiDateFromGregorian(time: false)"
+                   autocomplete="off"
+                   inputmode="numeric"
+                   dir="ltr"
+                   style="width:100%; padding:9px 12px; border:1px solid var(--qi-border); border-radius:8px; font-family:inherit; text-align:left;" />
+
+            <input type="hidden"
+                   name="Form.Date"
+                   id="Form_Date_hidden"
+                   value="@DateTime.Today.ToString("yyyy-MM-dd")" />
+        </div>
+
+        <div>
+            <label style="display:block; font-size:13px; margin-bottom:6px; color:#4b5563;">
+                روش پرداخت
+            </label>
+            <select asp-for="Form.Method" asp-items="Model.Form.MethodOptions"
+                    style="width:100%; padding:9px 12px; border:1px solid var(--qi-border);
+                           border-radius:8px; font-family:inherit;"></select>
+        </div>
+
+        <div style="grid-column:1/-1;">
+            <label style="display:block; font-size:13px; margin-bottom:6px; color:#4b5563;">
+                توضیحات
+            </label>
+            <input asp-for="Form.Note" type="text" placeholder="مثلاً: بابت مهر و آبان"
+                   style="width:100%; padding:9px 12px; border:1px solid var(--qi-border);
+                          border-radius:8px; font-family:inherit;" />
+        </div>
+
+        <div style="grid-column:1/-1;">
+            <button type="submit" class="qi-btn green">💾 ثبت و مشاهده رسید</button>
+        </div>
+    </form>
+</div>
+
+@* ─── لیست پرداخت‌ها ─── *@
+<div class="qi-card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h2>لیست پرداخت‌ها (@Model.Payments.TotalCount مورد)</h2>
+    </div>
+
+    <form method="get" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;">
+        <input type="text" name="search" value="@Model.Search"
+               placeholder="جستجو (نام، موبایل، شماره رسید)…"
+               style="flex:1; min-width:200px; padding:9px 12px; border:1px solid var(--qi-border);
+                      border-radius:8px; font-family:inherit;" />
+
+        <select name="method"
+                style="padding:9px 12px; border:1px solid var(--qi-border); border-radius:8px; font-family:inherit;">
+            @foreach (var m in Model.MethodOptions)
+            {
+                <option value="@m.Value" selected="@(m.Selected)">@m.Text</option>
+            }
+        </select>
+
+        <div>
+            <input type="text"
+                   class="persian-date-input"
+                   data-target="payFromDateHidden"
+                   placeholder="از تاریخ"
+                   value="@(Model.FromDate.HasValue? Model.FromDate.Value.GetShamsiDateFromGregorian(time: false) : "")"
+                   autocomplete="off"
+                   inputmode="numeric"
+                   dir="ltr"
+                   style="padding:9px 12px; border:1px solid var(--qi-border); border-radius:8px; font-family:inherit; min-width:140px; text-align:left;" />
+            <input type="hidden" name="fromDate" id="payFromDateHidden"
+                   value="@(Model.FromDate?.ToString("yyyy-MM-dd") ?? "")" />
+        </div>
+
+        <div>
+            <input type="text"
+                   class="persian-date-input"
+                   data-target="payToDateHidden"
+                   placeholder="تا تاریخ"
+                   value="@(Model.ToDate.HasValue? Model.ToDate.Value.GetShamsiDateFromGregorian(time: false) : "")"
+                   autocomplete="off"
+                   inputmode="numeric"
+                   dir="ltr"
+                   style="padding:9px 12px; border:1px solid var(--qi-border); border-radius:8px; font-family:inherit; min-width:140px; text-align:left;" />
+            <input type="hidden" name="toDate" id="payToDateHidden"
+                   value="@(Model.ToDate?.ToString("yyyy-MM-dd") ?? "")" />
+        </div>
+
+        <button type="submit" class="qi-btn">فیلتر</button>
+        <a href="/Admin/Payments" class="qi-btn gray">پاک‌کردن</a>
+    </form>
+
+    @if (!Model.Payments.Items.Any())
+    {
+        <p style="color:var(--qi-text-muted); text-align:center; padding:30px;">
+            هنوز پرداختی ثبت نشده است.
+        </p>
+    }
+    else
+    {
+        <div style="overflow-x:auto;">
+            <table style="width:100%; border-collapse:collapse;">
+                <thead>
+                    <tr style="background:#eef3f2; font-size:13px;">
+                        <th style="padding:10px; text-align:right;">شماره رسید</th>
+                        <th style="padding:10px; text-align:right;">تاریخ</th>
+                        <th style="padding:10px; text-align:right;">شاگرد</th>
+                        <th style="padding:10px; text-align:right;">کلاس</th>
+                        <th style="padding:10px; text-align:right;">مبلغ</th>
+                        <th style="padding:10px; text-align:right;">روش</th>
+                        <th style="padding:10px; text-align:right;">توضیح</th>
+                        <th style="padding:10px; text-align:right;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in Model.Payments.Items)
+                    {
+                        <tr style="border-bottom:1px solid #e5eae9;">
+                            <td style="padding:10px;">
+                                <code style="direction:ltr; display:inline-block;">@p.ReceiptNo</code>
+                            </td>
+                            <td style="padding:10px; font-size:13px;">
+                                @p.Date.GetShamsiDateFromGregorian(time: false).ToPersianDigits()
+                            </td>
+                            <td style="padding:10px;"><strong>@p.StudentName</strong></td>
+                            <td style="padding:10px;">@p.ClassName</td>
+                            <td style="padding:10px; font-weight:700; color:#166534;">
+                                @p.Amount.ToString("N0").ToPersianDigits() تومان
+                            </td>
+                            <td style="padding:10px;">
+                                <span style="background:@methodColors[p.Method]; color:#fff;
+                                                     padding:3px 10px; border-radius:20px; font-size:12px;">
+                                    @methodNames[p.Method]
+                                </span>
+                            </td>
+                            <td style="padding:10px; font-size:12px; color:var(--qi-text-muted);">
+                                @p.Note
+                            </td>
+                            <td style="padding:10px; white-space:nowrap;">
+                                <a href="/Admin/Payments/Receipt/@p.Id" class="qi-btn sm blue" target="_blank">رسید</a>
+                                <form method="post" action="/Admin/Payments/Delete/@p.Id"
+                                      style="display:inline;"
+                                      onsubmit="return confirm('این پرداخت حذف شود؟');">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="qi-btn sm red">حذف</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (Model.Payments.TotalPages > 1)
+        {
+            <div style="display:flex; gap:6px; justify-content:center; margin-top:20px;">
+                @for (int i = 1; i <= Model.Payments.TotalPages; i++)
+                {
+                    <a href="?page=@i&search=@Model.Search&method=@((int?)Model.Method)"
+                       class="qi-btn sm @(i == Model.Payments.Page ? "" : "gray")">
+                        @i.ToPersianDigits()
+                    </a>
+                }
+            </div>
+        }
+    }
+</div>

@@ -1,0 +1,232 @@
+﻿@model QuranInstitute.Application.Features.Payments.Queries.GetReceiptData.ReceiptDto
+@using QuranInstitute.Shared.Helpers
+@using QuranInstitute.Domain.Enums
+@{
+    Layout = null;   // بدون Layout، فقط رسید
+    var methodName = Model.Method switch
+    {
+        PaymentMethod.Cash => "نقدی",
+        PaymentMethod.Card => "کارت به کارت",
+        PaymentMethod.Online => "آنلاین",
+        PaymentMethod.Other => "سایر",
+        _ => "—"
+    };
+}
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <title>رسید پرداخت @Model.ReceiptNo</title>
+    <link rel="stylesheet" href="~/css/site.css" />
+    <style>
+        body {
+            background: #f3f6f5;
+            padding: 40px 20px;
+        }
+
+        .receipt-box {
+            background: #fff;
+            max-width: 640px;
+            margin: 0 auto;
+            border-radius: 14px;
+            padding: 32px;
+            box-shadow: 0 10px 30px rgba(0,0,0,.08);
+            border-top: 5px solid var(--qi-primary);
+        }
+
+        .receipt-header {
+            text-align: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px dashed #d6dedc;
+        }
+
+            .receipt-header h1 {
+                margin: 0 0 6px;
+                color: var(--qi-primary-dark);
+                font-size: 22px;
+            }
+
+            .receipt-header .subtitle {
+                color: var(--qi-text-muted);
+                font-size: 13px;
+            }
+
+        .receipt-no {
+            display: inline-block;
+            background: #f0fdf4;
+            color: #166534;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            margin-top: 8px;
+            direction: ltr;
+            font-family: monospace;
+        }
+
+        .receipt-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #f3f6f5;
+            font-size: 14px;
+        }
+
+            .receipt-row .label {
+                color: var(--qi-text-muted);
+            }
+
+            .receipt-row .value {
+                font-weight: 500;
+                color: var(--qi-text);
+            }
+
+        .receipt-amount {
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+            .receipt-amount .label {
+                font-size: 13px;
+                color: #166534;
+            }
+
+            .receipt-amount .amount {
+                font-size: 26px;
+                font-weight: 700;
+                color: #15803d;
+                margin-top: 8px;
+            }
+
+        .receipt-balance {
+            background: #fef3c7;
+            border-radius: 10px;
+            padding: 14px;
+            text-align: center;
+            font-size: 14px;
+            color: #92400e;
+        }
+
+        .receipt-footer {
+            margin-top: 32px;
+            padding-top: 20px;
+            border-top: 2px dashed #d6dedc;
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: var(--qi-text-muted);
+        }
+
+        .receipt-actions {
+            max-width: 640px;
+            margin: 20px auto 0;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        @@media print {
+            body {
+                background: #fff;
+                padding: 0;
+            }
+
+            .receipt-box {
+                box-shadow: none;
+            }
+
+            .receipt-actions {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="receipt-box">
+        <div class="receipt-header">
+            <h1>🕌 @Model.InstituteName</h1>
+            <div class="subtitle">رسید پرداخت شهریه</div>
+            <div class="receipt-no">@Model.ReceiptNo</div>
+        </div>
+
+        <div class="receipt-row">
+            <span class="label">تاریخ پرداخت:</span>
+            <span class="value">
+                @Model.Date.GetShamsiDateFromGregorian(time: false).ToPersianDigits()
+            </span>
+        </div>
+
+        <div class="receipt-row">
+            <span class="label">نام شاگرد:</span>
+            <span class="value">@Model.StudentName</span>
+        </div>
+
+        <div class="receipt-row">
+            <span class="label">نام ولی:</span>
+            <span class="value">@Model.ParentName</span>
+        </div>
+
+        <div class="receipt-row">
+            <span class="label">کلاس:</span>
+            <span class="value">@Model.ClassName</span>
+        </div>
+
+        <div class="receipt-row">
+            <span class="label">روش پرداخت:</span>
+            <span class="value">@methodName</span>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(Model.Note))
+        {
+            <div class="receipt-row">
+                <span class="label">توضیحات:</span>
+                <span class="value">@Model.Note</span>
+            </div>
+        }
+
+        <div class="receipt-amount">
+            <div class="label">مبلغ دریافتی</div>
+            <div class="amount">@Model.Amount.ToString("N0").ToPersianDigits() تومان</div>
+        </div>
+
+        <div class="receipt-balance">
+            <div style="margin-bottom:6px;">وضعیت حساب پس از این پرداخت</div>
+            @if (Model.Balance > 0)
+            {
+                <div>
+                    مانده بدهی: <b>@Model.Balance.ToString("N0").ToPersianDigits() تومان</b>
+                </div>
+            }
+            else if (Model.Balance < 0)
+            {
+                <div>
+                    مانده بستانکاری: <b>@((-Model.Balance).ToString("N0")).ToPersianDigits() تومان</b>
+                </div>
+            }
+            else
+            {
+                <div>✅ <b>حساب تسویه است</b></div>
+            }
+            <div style="font-size:12px; margin-top:8px;">
+                (جمع بدهی: @Model.TotalOwed.ToString("N0").ToPersianDigits() —
+                جمع پرداخت: @Model.TotalPaid.ToString("N0").ToPersianDigits())
+            </div>
+        </div>
+
+        <div class="receipt-footer">
+            <div>امضای دریافت‌کننده</div>
+            <div>مهر موسسه</div>
+        </div>
+    </div>
+
+    <div class="receipt-actions">
+        <button onclick="window.print()" class="qi-btn">🖨️ چاپ</button>
+        <a href="/Admin/Payments" class="qi-btn gray">بازگشت به لیست</a>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,86 @@
+﻿@model QuranInstitute.Application.Features.Tuition.Queries.GetStudentBalance.StudentBalanceDto
+@using QuranInstitute.Shared.Helpers
+@{
+    ViewData["Title"] = $"حساب {Model.StudentName}";
+}
+
+<div class="qi-card">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+        <div>
+            <h2 style="margin:0 0 6px;">@Model.StudentName</h2>
+            <div style="color:var(--qi-text-muted); font-size:13px;">
+                ولی: @Model.ParentName —
+                موبایل: <span dir="ltr">@Model.ParentMobile.ToPersianDigits()</span> —
+                کلاس: @Model.ClassName
+            </div>
+        </div>
+        <a href="/Admin/Payments?studentId=@Model.StudentId" class="qi-btn green">💰 ثبت پرداخت</a>
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(170px,1fr)); gap:12px; margin-bottom:20px;">
+        <div style="background:#f3f6f5; padding:14px; border-radius:10px;">
+            <div style="color:var(--qi-text-muted); font-size:12px;">شهریه ماهانه</div>
+            <div style="font-size:16px; font-weight:700; margin-top:4px;">
+                @Model.MonthlyFee.ToString("N0").ToPersianDigits() تومان
+            </div>
+        </div>
+
+        <div style="background:#f3f6f5; padding:14px; border-radius:10px;">
+            <div style="color:var(--qi-text-muted); font-size:12px;">تعداد ماه</div>
+            <div style="font-size:16px; font-weight:700; margin-top:4px;">
+                @Model.MonthCount.ToPersianDigits() ماه
+            </div>
+        </div>
+
+        <div style="background:#f3f6f5; padding:14px; border-radius:10px;">
+            <div style="color:var(--qi-text-muted); font-size:12px;">جمع بدهی</div>
+            <div style="font-size:16px; font-weight:700; margin-top:4px;">
+                @Model.TotalOwed.ToString("N0").ToPersianDigits() تومان
+            </div>
+        </div>
+
+        <div style="background:#f0fdf4; padding:14px; border-radius:10px;">
+            <div style="color:#166534; font-size:12px;">جمع پرداخت</div>
+            <div style="font-size:16px; font-weight:700; color:#16a34a; margin-top:4px;">
+                @Model.TotalPaid.ToString("N0").ToPersianDigits() تومان
+            </div>
+        </div>
+
+        @{
+            var balanceBg = Model.Balance > 0 ? "#fef2f2" : Model.Balance < 0 ? "#eff6ff" : "#f0fdf4";
+            var balanceColor = Model.Balance > 0 ? "#b91c1c" : Model.Balance < 0 ? "#1d4ed8" : "#16a34a";
+        }
+        <div style="background:@balanceBg; padding:14px; border-radius:10px;">
+            <div style="color:@balanceColor; font-size:12px;">مانده</div>
+            <div style="font-size:16px; font-weight:700; color:@balanceColor; margin-top:4px;">
+                @if (Model.Balance > 0)
+                {
+                    <span>@Model.Balance.ToString("N0").ToPersianDigits() بدهکار</span>
+                }
+                else if (Model.Balance < 0)
+                {
+                    <span>@((-Model.Balance).ToString("N0")).ToPersianDigits() بستانکار</span>
+                }
+                else
+                {
+                    <span>تسویه ✅</span>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div style="background:#eef3f2; padding:14px 18px; border-radius:10px; font-size:13px;">
+        <b>نحوه محاسبه:</b>
+        شهریه ماهانه (<b>@Model.MonthlyFee.ToString("N0").ToPersianDigits()</b> تومان)
+        × تعداد ماه‌های گذشته از تاریخ شروع
+        (<b>@Model.StartDate.GetShamsiDateFromGregorian(time: false).ToPersianDigits()</b>)
+        = <b>@Model.TotalOwed.ToString("N0").ToPersianDigits()</b> تومان
+        —
+        منهای مجموع پرداخت‌ها
+        (<b>@Model.TotalPaid.ToString("N0").ToPersianDigits()</b> تومان).
+    </div>
+
+    <div style="margin-top:20px;">
+        <a href="/Admin/Tuition" class="qi-btn gray">بازگشت به لیست بدهکاران</a>
+    </div>
+</div>

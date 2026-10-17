@@ -1,0 +1,105 @@
+﻿@model QuranInstitute.Web.ViewModels.Tuition.TuitionListViewModel
+@using QuranInstitute.Shared.Helpers
+@{
+    ViewData["Title"] = "بدهکاران شهریه";
+}
+
+<div class="qi-card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h2>لیست بدهکاران (@Model.Debtors.TotalCount نفر)</h2>
+    </div>
+
+    <form method="get" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;">
+        <input type="text" name="search" value="@Model.Search"
+               placeholder="جستجو (نام، ولی، موبایل)…"
+               style="flex:1; min-width:200px; padding:9px 12px; border:1px solid var(--qi-border);
+                      border-radius:8px; font-family:inherit;" />
+
+        <select name="classId"
+                style="padding:9px 12px; border:1px solid var(--qi-border); border-radius:8px;
+                       font-family:inherit; min-width:180px;">
+            <option value="">همه کلاس‌ها</option>
+            @foreach (var c in Model.Classes)
+            {
+                <option value="@c.Value" selected="@(c.Selected)">@c.Text</option>
+            }
+        </select>
+
+        <button type="submit" class="qi-btn">فیلتر</button>
+        <a href="/Admin/Tuition" class="qi-btn gray">پاک‌کردن</a>
+    </form>
+
+    @if (!Model.Debtors.Items.Any())
+    {
+        <div style="text-align:center; padding:40px;">
+            <div style="font-size:48px;">✅</div>
+            <p style="color:#16a34a; font-size:16px;">هیچ بدهکاری وجود ندارد.</p>
+        </div>
+    }
+    else
+    {
+        <div style="overflow-x:auto;">
+            <table style="width:100%; border-collapse:collapse;">
+                <thead>
+                    <tr style="background:#fef2f2; font-size:13px;">
+                        <th style="padding:10px; text-align:right;">#</th>
+                        <th style="padding:10px; text-align:right;">نام شاگرد</th>
+                        <th style="padding:10px; text-align:right;">ولی</th>
+                        <th style="padding:10px; text-align:right;">موبایل</th>
+                        <th style="padding:10px; text-align:right;">کلاس</th>
+                        <th style="padding:10px; text-align:right;">ماه‌ها</th>
+                        <th style="padding:10px; text-align:right;">جمع بدهی</th>
+                        <th style="padding:10px; text-align:right;">پرداخت‌شده</th>
+                        <th style="padding:10px; text-align:right;">مانده</th>
+                        <th style="padding:10px; text-align:right;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        var idx = (Model.Debtors.Page - 1) * Model.Debtors.PageSize;
+                    }
+                    @foreach (var d in Model.Debtors.Items)
+                    {
+                        idx++;
+                        <tr style="border-bottom:1px solid #e5eae9;">
+                            <td style="padding:10px;">@idx.ToPersianDigits()</td>
+                            <td style="padding:10px;"><strong>@d.StudentName</strong></td>
+                            <td style="padding:10px;">@d.ParentName</td>
+                            <td style="padding:10px; direction:ltr; text-align:right;">
+                                @d.ParentMobile.ToPersianDigits()
+                            </td>
+                            <td style="padding:10px;">@d.ClassName</td>
+                            <td style="padding:10px;">@d.MonthCount.ToPersianDigits() ماه</td>
+                            <td style="padding:10px;">
+                                @d.TotalOwed.ToString("N0").ToPersianDigits()
+                            </td>
+                            <td style="padding:10px; color:#16a34a;">
+                                @d.TotalPaid.ToString("N0").ToPersianDigits()
+                            </td>
+                            <td style="padding:10px; font-weight:700; color:#b91c1c;">
+                                @d.Balance.ToString("N0").ToPersianDigits() تومان
+                            </td>
+                            <td style="padding:10px; white-space:nowrap;">
+                                <a href="/Admin/Tuition/Student/@d.StudentId" class="qi-btn sm blue">جزئیات</a>
+                                <a href="/Admin/Payments?studentId=@d.StudentId" class="qi-btn sm green">پرداخت</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (Model.Debtors.TotalPages > 1)
+        {
+            <div style="display:flex; gap:6px; justify-content:center; margin-top:20px;">
+                @for (int i = 1; i <= Model.Debtors.TotalPages; i++)
+                {
+                    <a href="?page=@i&search=@Model.Search&classId=@Model.ClassId"
+                       class="qi-btn sm @(i == Model.Debtors.Page ? "" : "gray")">
+                        @i.ToPersianDigits()
+                    </a>
+                }
+            </div>
+        }
+    }
+</div>
