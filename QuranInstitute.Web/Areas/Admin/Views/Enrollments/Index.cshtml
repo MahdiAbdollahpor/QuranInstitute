@@ -81,31 +81,23 @@
                             <td style="padding:10px; white-space:nowrap;">
                                 @if (e.Status == EnrollmentStatus.Pending)
                                 {
-                                    <form method="post" action="/Admin/Enrollments/Approve/@e.Id"
-                                          style="display:inline;">
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="returnUrl" value="@currentUrl" />
-                                        <button type="submit" class="qi-btn sm green">تأیید</button>
-                                    </form>
-                                    <form method="post" action="/Admin/Enrollments/Reject/@e.Id"
-                                          style="display:inline;"
-                                          onsubmit="return confirm('این ثبت‌نام رد شود؟');">
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="returnUrl" value="@currentUrl" />
-                                        <button type="submit" class="qi-btn sm red">رد</button>
-                                    </form>
+                                    <button type="button" class="qi-btn sm green"
+                                            onclick="openApproveModal('@e.Id', '@e.StudentName', '@e.ClassName', '@e.ParentMobile', '@currentUrl')">
+                                        تأیید
+                                    </button>
+                                    <button type="button" class="qi-btn sm red"
+                                            onclick="openRejectModal('@e.Id', '@e.StudentName', '@e.ClassName', '@currentUrl')">
+                                        رد
+                                    </button>
                                 }
                                 @if (e.Status == EnrollmentStatus.Approved)
                                 {
                                     <a href="/Admin/Enrollments/Transfer?studentId=@e.StudentId&fromClassId=@e.ClassId"
                                        class="qi-btn sm blue">انتقال</a>
-                                    <form method="post" action="/Admin/Enrollments/Cancel/@e.Id"
-                                          style="display:inline;"
-                                          onsubmit="return confirm('ثبت‌نام لغو شود؟');">
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="returnUrl" value="@currentUrl" />
-                                        <button type="submit" class="qi-btn sm gray">لغو</button>
-                                    </form>
+                                    <button type="button" class="qi-btn sm gray"
+                                            onclick="openCancelModal('@e.Id', '@e.StudentName', '@e.ClassName', '@currentUrl')">
+                                        لغو
+                                    </button>
                                 }
                             </td>
                         </tr>
@@ -127,4 +119,51 @@
             </div>
         }
     }
+
+    @* Modal ها *@
+    <partial name="_EnrollmentModals" />
+
+    <script>
+        var currentReturnUrl = '';
+
+        function openApproveModal(id, studentName, className, mobile, returnUrl) {
+            document.getElementById('approveStudentName').textContent = studentName;
+            document.getElementById('approveClassName').textContent = className;
+            document.getElementById('approveParentMobile').textContent = mobile;
+            document.getElementById('approveReturnUrl').value = returnUrl;
+
+            var form = document.getElementById('approveForm');
+            form.action = '/Admin/Enrollments/Approve/' + id;
+
+            openModal('approveModal');
+        }
+
+        function openRejectModal(id, studentName, className, returnUrl) {
+            document.getElementById('rejectStudentName').textContent = studentName;
+            document.getElementById('rejectClassName').textContent = className;
+            document.getElementById('rejectReturnUrl').value = returnUrl;
+            document.getElementById('rejectReason').value = '';
+
+            var form = document.getElementById('rejectForm');
+            form.action = '/Admin/Enrollments/Reject/' + id;
+
+            openModal('rejectModal');
+
+            // فوکوس روی textarea
+            setTimeout(function () {
+                document.getElementById('rejectReason').focus();
+            }, 200);
+        }
+
+        function openCancelModal(id, studentName, className, returnUrl) {
+            document.getElementById('cancelStudentName').textContent = studentName;
+            document.getElementById('cancelClassName').textContent = className;
+            document.getElementById('cancelReturnUrl').value = returnUrl;
+
+            var form = document.getElementById('cancelForm');
+            form.action = '/Admin/Enrollments/Cancel/' + id;
+
+            openModal('cancelModal');
+        }
+    </script>
 </div>

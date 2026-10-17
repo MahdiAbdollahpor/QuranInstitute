@@ -20,3 +20,42 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
+// ═══════════════════════════════════════════
+// Modal Management
+// ═══════════════════════════════════════════
+window.openModal = function (id) {
+    var el = document.getElementById(id);
+    if (el) {
+        el.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+};
+
+window.closeModal = function (id) {
+    var el = document.getElementById(id);
+    if (el) {
+        el.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+};
+
+// بستن با کلیک بیرون
+document.addEventListener('click', function (e) {
+    if (e.target.classList && e.target.classList.contains('qi-modal-overlay')) {
+        e.target.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+});
+
+// بستن با Esc
+document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+        document.querySelectorAll('.qi-modal-overlay').forEach(function (el) {
+            if (el.style.display === 'flex') {
+                el.style.display = 'none';
+            }
+        });
+        document.body.style.overflow = '';
+    }
+});

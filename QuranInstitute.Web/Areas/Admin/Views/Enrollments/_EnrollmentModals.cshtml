@@ -1,0 +1,147 @@
+﻿@* ═══════════════════════════════════════════════
+   Modal تأیید ثبت‌نام
+   ═══════════════════════════════════════════════ *@
+<div id="approveModal" class="qi-modal-overlay" style="display:none;">
+    <div class="qi-modal" style="max-width:460px;">
+        <div class="qi-modal-header" style="background:#f0fdf4; border-bottom-color:#bbf7d0;">
+            <h3 style="color:#166534;">
+                <span style="font-size:22px;">✅</span>
+                تأیید ثبت‌نام
+            </h3>
+            <button type="button" class="qi-modal-close" onclick="closeModal('approveModal')">×</button>
+        </div>
+
+        <div class="qi-modal-body">
+            <p style="margin:0 0 16px; color:#4b5563;">
+                آیا از تأیید این ثبت‌نام مطمئن هستید؟
+            </p>
+
+            <div class="qi-modal-info">
+                <div class="qi-info-row">
+                    <span class="qi-info-label">شاگرد:</span>
+                    <span class="qi-info-value" id="approveStudentName">—</span>
+                </div>
+                <div class="qi-info-row">
+                    <span class="qi-info-label">کلاس:</span>
+                    <span class="qi-info-value" id="approveClassName">—</span>
+                </div>
+                <div class="qi-info-row">
+                    <span class="qi-info-label">موبایل ولی:</span>
+                    <span class="qi-info-value" id="approveParentMobile" dir="ltr">—</span>
+                </div>
+            </div>
+
+            <p style="margin:16px 0 0; font-size:12px; color:#6b7280; background:#f3f6f5; padding:10px; border-radius:6px;">
+                💡 پس از تأیید، شاگرد به لیست کلاس اضافه می‌شود و می‌تواند در جلسات شرکت کند.
+            </p>
+        </div>
+
+        <div class="qi-modal-footer">
+            <form method="post" id="approveForm" style="margin:0;">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="returnUrl" id="approveReturnUrl" />
+                <button type="submit" class="qi-btn green">✅ بله، تأیید کن</button>
+                <button type="button" class="qi-btn gray" onclick="closeModal('approveModal')">انصراف</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@* ═══════════════════════════════════════════════
+   Modal رد ثبت‌نام
+   ═══════════════════════════════════════════════ *@
+<div id="rejectModal" class="qi-modal-overlay" style="display:none;">
+    <div class="qi-modal" style="max-width:460px;">
+        <div class="qi-modal-header" style="background:#fef2f2; border-bottom-color:#fecaca;">
+            <h3 style="color:#b91c1c;">
+                <span style="font-size:22px;">❌</span>
+                رد ثبت‌نام
+            </h3>
+            <button type="button" class="qi-modal-close" onclick="closeModal('rejectModal')">×</button>
+        </div>
+
+        <div class="qi-modal-body">
+            <p style="margin:0 0 16px; color:#4b5563;">
+                آیا از رد این ثبت‌نام مطمئن هستید؟
+            </p>
+
+            <div class="qi-modal-info">
+                <div class="qi-info-row">
+                    <span class="qi-info-label">شاگرد:</span>
+                    <span class="qi-info-value" id="rejectStudentName">—</span>
+                </div>
+                <div class="qi-info-row">
+                    <span class="qi-info-label">کلاس:</span>
+                    <span class="qi-info-value" id="rejectClassName">—</span>
+                </div>
+            </div>
+
+            <div style="margin-top:16px;">
+                <label style="display:block; font-size:13px; margin-bottom:6px; color:#4b5563;">
+                    دلیل رد (اختیاری):
+                </label>
+                <textarea name="reason" id="rejectReason" rows="3"
+                          placeholder="مثلاً: ظرفیت کلاس تکمیل است / شرایط ثبت‌نام را ندارد"
+                          style="width:100%; padding:9px 12px; border:1px solid var(--qi-border);
+                                 border-radius:8px; font-family:inherit; resize:vertical;"></textarea>
+                <div style="font-size:11px; color:#6b7280; margin-top:4px;">
+                    این دلیل در تاریخچه ثبت‌نام ذخیره می‌شود (به والد نمایش داده نمی‌شود).
+                </div>
+            </div>
+        </div>
+
+        <div class="qi-modal-footer">
+            <form method="post" id="rejectForm" style="margin:0;">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="returnUrl" id="rejectReturnUrl" />
+                <button type="submit" class="qi-btn red">❌ بله، رد کن</button>
+                <button type="button" class="qi-btn gray" onclick="closeModal('rejectModal')">انصراف</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@* ═══════════════════════════════════════════════
+   Modal لغو ثبت‌نام
+   ═══════════════════════════════════════════════ *@
+<div id="cancelModal" class="qi-modal-overlay" style="display:none;">
+    <div class="qi-modal" style="max-width:460px;">
+        <div class="qi-modal-header" style="background:#fef3c7; border-bottom-color:#fde68a;">
+            <h3 style="color:#92400e;">
+                <span style="font-size:22px;">⚠️</span>
+                لغو ثبت‌نام
+            </h3>
+            <button type="button" class="qi-modal-close" onclick="closeModal('cancelModal')">×</button>
+        </div>
+
+        <div class="qi-modal-body">
+            <p style="margin:0 0 16px; color:#4b5563;">
+                آیا از لغو این ثبت‌نام مطمئن هستید؟
+            </p>
+
+            <div class="qi-modal-info">
+                <div class="qi-info-row">
+                    <span class="qi-info-label">شاگرد:</span>
+                    <span class="qi-info-value" id="cancelStudentName">—</span>
+                </div>
+                <div class="qi-info-row">
+                    <span class="qi-info-label">کلاس:</span>
+                    <span class="qi-info-value" id="cancelClassName">—</span>
+                </div>
+            </div>
+
+            <p style="margin:16px 0 0; font-size:12px; color:#92400e; background:#fef3c7; padding:10px; border-radius:6px;">
+                ⚠️ پس از لغو، شاگرد از لیست کلاس حذف می‌شود. این عمل قابل بازگشت نیست (باید از نو ثبت‌نام شود).
+            </p>
+        </div>
+
+        <div class="qi-modal-footer">
+            <form method="post" id="cancelForm" style="margin:0;">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="returnUrl" id="cancelReturnUrl" />
+                <button type="submit" class="qi-btn red">بله، لغو کن</button>
+                <button type="button" class="qi-btn gray" onclick="closeModal('cancelModal')">انصراف</button>
+            </form>
+        </div>
+    </div>
+</div>

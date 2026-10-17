@@ -1,0 +1,64 @@
+﻿@model QuranInstitute.Web.ViewModels.UserPanel.MyNotificationsViewModel
+@using QuranInstitute.Shared.Helpers
+@using QuranInstitute.Domain.Enums
+@{
+    ViewData["Title"] = "اطلاعیه‌ها";
+}
+
+<div class="qi-card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h2>اطلاعیه‌ها (@Model.Notifications.Count)</h2>
+
+        @if (Model.Notifications.Any(n => !n.IsRead))
+        {
+            <form method="post" action="/User/Notifications/MarkAllRead">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="qi-btn sm gray">همه را خوانده‌شده کن</button>
+            </form>
+        }
+    </div>
+
+    @if (!Model.Notifications.Any())
+    {
+        <p style="color:var(--qi-text-muted); text-align:center; padding:30px;">
+            هیچ اطلاعیه‌ای ندارید.
+        </p>
+    }
+    else
+    {
+        <div style="display:flex; flex-direction:column; gap:10px;">
+            @foreach (var n in Model.Notifications)
+            {
+                var icon = n.Type switch
+                {
+                    NotificationType.Attendance => "🚫",
+                    NotificationType.Payment => "💰",
+                    NotificationType.Announcement => "📢",
+                    _ => "ℹ️"
+                };
+                var bg = n.IsRead ? "#fff" : "#f0f9ff";
+                var border = n.IsRead ? "var(--qi-border)" : "#0ea5e9";
+
+                <div style="border:1px solid @border; border-radius:10px; padding:14px; background:@bg;">
+                    <div style="display:flex; justify-content:space-between; align-items:start;">
+                        <div>
+                            <div style="font-weight:700;">@icon @n.Title</div>
+                            <div style="margin-top:6px; font-size:13px; color:#4b5563;">@n.Body</div>
+                            <div style="margin-top:6px; font-size:11px; color:var(--qi-text-muted);">
+                                @n.CreatedAt.GetShamsiDateFromGregorian(time: true).ToPersianDigits()
+                            </div>
+                        </div>
+
+                        @if (!n.IsRead)
+                        {
+                            <form method="post" action="/User/Notifications/MarkRead/@n.Id">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="qi-btn sm gray">خواندم</button>
+                            </form>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

@@ -59,7 +59,8 @@ public class GetStudentsListQueryHandler
                     .FirstOrDefault() ?? "—",
                 MonthlyFee = s.MonthlyFee,
                 StartDate = s.StartDate,
-                Active = s.Active
+                Active = s.Active,
+                UserId = s.UserId
             })
             .ToListAsync(ct);
 

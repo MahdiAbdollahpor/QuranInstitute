@@ -209,3 +209,151 @@
         padding: 16px;
     }
 }
+
+
+
+/* ═══════════════════════════════════════════
+   Modal — طراحی تمیز برای پنل ادمین
+   ═══════════════════════════════════════════ */
+.qi-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(2px);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: qiFadeIn 0.15s ease-out;
+}
+
+@keyframes qiFadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.qi-modal {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 20px 50px rgba(0,0,0,.25);
+    width: 100%;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    animation: qiSlideUp 0.2s ease-out;
+    overflow: hidden;
+}
+
+@keyframes qiSlideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.qi-modal-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--qi-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+    .qi-modal-header h3 {
+        margin: 0;
+        font-size: 17px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+.qi-modal-close {
+    background: transparent;
+    border: 0;
+    font-size: 26px;
+    line-height: 1;
+    color: #6b7280;
+    cursor: pointer;
+    padding: 0 8px;
+    border-radius: 6px;
+    transition: background 0.15s;
+}
+
+    .qi-modal-close:hover {
+        background: #f3f6f5;
+        color: #1f2937;
+    }
+
+.qi-modal-body {
+    padding: 20px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.qi-modal-footer {
+    padding: 16px 20px;
+    border-top: 1px solid var(--qi-border);
+    background: #fafbfb;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+    .qi-modal-footer form {
+        display: flex;
+        gap: 10px;
+        margin: 0;
+    }
+
+.qi-modal-info {
+    background: #f3f6f5;
+    border-radius: 10px;
+    padding: 14px 16px;
+}
+
+.qi-info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    font-size: 13px;
+}
+
+    .qi-info-row + .qi-info-row {
+        border-top: 1px dashed #d6dedc;
+    }
+
+.qi-info-label {
+    color: #6b7280;
+}
+
+.qi-info-value {
+    color: #1f2937;
+    font-weight: 500;
+}
+
+/* Mobile */
+@media (max-width: 500px) {
+    .qi-modal-footer {
+        flex-direction: column-reverse;
+    }
+
+        .qi-modal-footer form {
+            flex-direction: column-reverse;
+            width: 100%;
+        }
+
+        .qi-modal-footer .qi-btn {
+            width: 100%;
+        }
+}

@@ -79,6 +79,14 @@
                                     @Html.AntiForgeryToken()
                                     <button type="submit" class="qi-btn sm red">غیرفعال</button>
                                 </form>
+
+                                @if (!s.UserId.HasValue)
+                                {
+                                    <button type="button" class="qi-btn sm blue"
+                                            onclick="createAccount('@s.Id', '@s.Name')">
+                                        🔑 ساخت حساب
+                                    </button>
+                                }
                             </td>
                         </tr>
                     }
@@ -100,3 +108,46 @@
         }
     }
 </div>
+
+
+
+@* Modal ساخت حساب *@
+<div id="accountModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:9999; align-items:center; justify-content:center;">
+    <div style="background:#fff; border-radius:12px; padding:24px; max-width:400px; width:90%;">
+        <h3 id="accTitle" style="margin:0 0 16px; color:var(--qi-primary-dark);">ساخت حساب کاربری</h3>
+
+        <form method="post" action="/Admin/Students/CreateAccount" id="accForm">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="studentId" id="accStudentId" />
+
+            <div style="margin-bottom:14px;">
+                <label style="display:block; font-size:13px; margin-bottom:6px;">رمز عبور</label>
+                <input type="text" name="password" required minlength="6"
+                       placeholder="حداقل ۶ کاراکتر"
+                       value="123456"
+                       style="width:100%; padding:9px 12px; border:1px solid var(--qi-border); border-radius:8px; font-family:inherit;" />
+            </div>
+
+            <div style="margin-bottom:14px;">
+                <label style="display:block; font-size:13px; margin-bottom:6px;">نقش</label>
+                <select name="role" style="width:100%; padding:9px 12px; border:1px solid var(--qi-border); border-radius:8px; font-family:inherit;">
+                    <option value="Parent">والد</option>
+                    <option value="Student">شاگرد</option>
+                </select>
+            </div>
+
+            <div style="display:flex; gap:10px;">
+                <button type="submit" class="qi-btn">ساخت حساب</button>
+                <button type="button" class="qi-btn gray" onclick="document.getElementById('accountModal').style.display='none'">انصراف</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function createAccount(studentId, name) {
+        document.getElementById('accStudentId').value = studentId;
+        document.getElementById('accTitle').textContent = 'ساخت حساب برای ' + name;
+        document.getElementById('accountModal').style.display = 'flex';
+    }
+</script>

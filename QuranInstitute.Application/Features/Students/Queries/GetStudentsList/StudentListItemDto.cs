@@ -11,4 +11,6 @@ public class StudentListItemDto
     public decimal MonthlyFee { get; set; }
     public DateTime StartDate { get; set; }
     public bool Active { get; set; }
+
+    public Guid? UserId { get; set; }
 }

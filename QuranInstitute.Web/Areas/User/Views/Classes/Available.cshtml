@@ -1,0 +1,109 @@
+﻿@model QuranInstitute.Web.ViewModels.UserPanel.AvailableClassesViewModel
+@using MediatR
+@using QuranInstitute.Shared.Helpers
+@using QuranInstitute.Domain.Enums
+@using QuranInstitute.Application.Features.UserPanel.Queries.GetMyProfile
+@inject IMediator Mediator
+@{
+    ViewData["Title"] = "کلاس‌های قابل ثبت‌نام";
+    var dayNames = new[] { "یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنجشنبه", "جمعه", "شنبه" };
+
+    var profile = await Mediator.Send(new GetMyProfileQuery());
+    var myStudents = profile.IsSuccess ? profile.Value!.Students : new List<MyStudentInfo>();
+}
+
+<div class="qi-card">
+    <h2>کلاس‌های قابل ثبت‌نام</h2>
+
+    @if (!myStudents.Any())
+    {
+        <p style="color:var(--qi-text-muted);">شاگردی به حساب شما متصل نیست.</p>
+    }
+    else if (!Model.Classes.Any())
+    {
+        <p style="color:var(--qi-text-muted); text-align:center; padding:30px;">
+            هیچ کلاسی برای ثبت‌نام موجود نیست.
+        </p>
+    }
+    else
+    {
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:14px;">
+            @foreach (var c in Model.Classes)
+            {
+                var dayStr = string.Join("، ", c.Days.Select(x => dayNames[x]));
+                var typeStr = c.Type switch
+                {
+                    ClassType.InPerson => "حضوری",
+                    ClassType.Online => "مجازی",
+                    ClassType.Hybrid => "ترکیبی",
+                    _ => "—"
+                };
+
+                <div style="border:1px solid var(--qi-border); border-radius:10px; padding:16px;
+                                    @(c.IsFull ? "background:#fef2f2;" : "")">
+                    <div style="display:flex; justify-content:space-between; align-items:start;">
+                        <div>
+                            <div style="font-weight:700;">@c.ClassName</div>
+                            <div style="font-size:12px; color:var(--qi-text-muted);">
+                                استاد: @c.TeacherName
+                            </div>
+                        </div>
+                        <span style="background:#0f766e; color:#fff; padding:3px 10px; border-radius:20px; font-size:11px;">
+                            @typeStr
+                        </span>
+                    </div>
+
+                    <div style="margin-top:10px; font-size:13px; color:#4b5563;">
+                        @if (!string.IsNullOrEmpty(c.ClassTime))
+                        {
+                            <div>⏰ @c.ClassTime</div>
+                        }
+                        <div>📅 @dayStr</div>
+                        <div>
+                            ظرفیت: @c.StudentCount.ToPersianDigits() / @c.Capacity.ToPersianDigits()
+                        </div>
+                    </div>
+
+                    @if (c.IsEnrolled)
+                    {
+                        <div style="background:#f0fdf4; color:#16a34a; padding:8px; border-radius:6px;
+                                                margin-top:10px; text-align:center; font-size:13px;">
+                            ✅ شما در این کلاس هستید
+                        </div>
+                    }
+                    else if (c.IsFull)
+                    {
+                        <div style="background:#fef2f2; color:#b91c1c; padding:8px; border-radius:6px;
+                                                margin-top:10px; text-align:center; font-size:13px;">
+                            ظرفیت پر است
+                        </div>
+                    }
+                    else if (myStudents.Count == 1)
+                    {
+                        <form method="post" action="/User/Classes/RequestEnrollment" style="margin-top:10px;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="studentId" value="@myStudents[0].StudentId" />
+                            <input type="hidden" name="classId" value="@c.ClassId" />
+                            <button type="submit" class="qi-btn green">📝 ثبت‌نام</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <form method="post" action="/User/Classes/RequestEnrollment" style="margin-top:10px;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="classId" value="@c.ClassId" />
+                            <select name="studentId" required
+                                    style="width:100%; padding:8px; border:1px solid var(--qi-border); border-radius:6px; margin-bottom:6px; font-family:inherit;">
+                                @foreach (var s in myStudents)
+                                {
+                                    <option value="@s.StudentId">برای: @s.Name</option>
+                                }
+                            </select>
+                            <button type="submit" class="qi-btn green">📝 ثبت‌نام</button>
+                        </form>
+                    }
+                </div>
+            }
+        </div>
+    }
+</div>

@@ -1,8 +1,101 @@
-﻿@{
+﻿@model QuranInstitute.Web.ViewModels.UserPanel.UserDashboardViewModel
+@using QuranInstitute.Shared.Helpers
+@{
     ViewData["Title"] = "داشبورد";
+    var d = Model.Data;
 }
 
 <div class="qi-card">
     <h2>خوش آمدید 👋</h2>
-    <p>این پنل کاربری شماست. از منوی کنار، بخش مورد نظر را انتخاب کنید.</p>
+    <p style="color:var(--qi-text-muted);">این پنل کاربری شماست.</p>
+</div>
+
+<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px,1fr)); gap:12px; margin-bottom:16px;">
+    <div class="qi-card">
+        <div style="color:var(--qi-text-muted); font-size:12px;">جمع بدهی</div>
+        <div style="font-size:22px; color:@(d.TotalDebt > 0 ? "#b91c1c" : "#16a34a"); font-weight:700; margin-top:6px;">
+            @d.TotalDebt.ToString("N0").ToPersianDigits() تومان
+        </div>
+    </div>
+
+    <div class="qi-card">
+        <div style="color:var(--qi-text-muted); font-size:12px;">پرداختی این ماه</div>
+        <div style="font-size:22px; color:#16a34a; font-weight:700; margin-top:6px;">
+            @d.TotalPaidThisMonth.ToString("N0").ToPersianDigits() تومان
+        </div>
+    </div>
+
+    <div class="qi-card">
+        <div style="color:var(--qi-text-muted); font-size:12px;">غیبت‌های این ماه</div>
+        <div style="font-size:22px; color:@(d.AbsencesThisMonth > 0 ? "#b91c1c" : "#16a34a"); font-weight:700; margin-top:6px;">
+            @d.AbsencesThisMonth.ToPersianDigits() جلسه
+        </div>
+    </div>
+
+    <div class="qi-card">
+        <div style="color:var(--qi-text-muted); font-size:12px;">اعلان‌های خوانده‌نشده</div>
+        <div style="font-size:22px; color:#1d4ed8; font-weight:700; margin-top:6px;">
+            @d.UnreadNotifications.ToPersianDigits()
+        </div>
+    </div>
+</div>
+
+@* شاگردان *@
+@if (d.Students.Any())
+{
+    <div class="qi-card">
+        <h2>شاگردان شما</h2>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:12px;">
+            @foreach (var s in d.Students)
+            {
+                <div style="background:#f3f6f5; padding:14px; border-radius:10px;">
+                    <div style="font-weight:700;">@s.Name</div>
+                    <div style="color:var(--qi-text-muted); font-size:12px; margin-top:4px;">
+                        کلاس: @s.ClassName
+                    </div>
+                    <div style="color:var(--qi-text-muted); font-size:12px;">
+                        شهریه: @s.MonthlyFee.ToString("N0").ToPersianDigits() تومان
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@* کلاس‌های من *@
+@if (d.UpcomingClasses.Any())
+{
+    <div class="qi-card">
+        <h2>کلاس‌های من</h2>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px,1fr)); gap:12px;">
+            @foreach (var c in d.UpcomingClasses)
+            {
+                var dayNames = new[] { "یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنجشنبه", "جمعه", "شنبه" };
+                var dayStr = string.Join("، ", c.Days.Select(x => dayNames[x]));
+
+                <div style="background:#f0fdf4; border:1px solid #bbf7d0; padding:14px; border-radius:10px;">
+                    <div style="font-weight:700; color:#166534;">@c.ClassName</div>
+                    <div style="font-size:12px; color:#166534; margin-top:4px;">استاد: @c.TeacherName</div>
+                    <div style="font-size:12px; color:#4b5563; margin-top:4px;">@dayStr</div>
+                    @if (!string.IsNullOrEmpty(c.ClassTime))
+                    {
+                        <div style="font-size:12px; color:#4b5563;">ساعت: @c.ClassTime</div>
+                    }
+                    @if (!string.IsNullOrEmpty(c.OnlineLink))
+                    {
+                        <a href="@c.OnlineLink" target="_blank" class="qi-btn sm blue" style="margin-top:8px;">
+                            🔗 ورود به کلاس آنلاین
+                        </a>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+}
+
+<div class="qi-card" style="display:flex; gap:10px; flex-wrap:wrap;">
+    <a href="/User/Classes" class="qi-btn">کلاس‌های من</a>
+    <a href="/User/Classes/Available" class="qi-btn gray">ثبت‌نام در کلاس جدید</a>
+    <a href="/User/Payments" class="qi-btn blue">صورتحساب</a>
+    <a href="/User/Attendance" class="qi-btn green">حضور و غیاب من</a>
 </div>

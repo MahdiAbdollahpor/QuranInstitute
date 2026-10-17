@@ -1,0 +1,72 @@
+﻿@model QuranInstitute.Web.ViewModels.UserPanel.MyClassesViewModel
+@using QuranInstitute.Shared.Helpers
+@using QuranInstitute.Domain.Enums
+@{
+    ViewData["Title"] = "کلاس‌های من";
+    var dayNames = new[] { "یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنجشنبه", "جمعه", "شنبه" };
+}
+
+<div class="qi-card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h2>کلاس‌های من (@Model.Classes.Count)</h2>
+        <a href="/User/Classes/Available" class="qi-btn">+ ثبت‌نام در کلاس جدید</a>
+    </div>
+
+    @if (!Model.Classes.Any())
+    {
+        <p style="color:var(--qi-text-muted); text-align:center; padding:30px;">
+            هنوز در هیچ کلاسی ثبت‌نام نکرده‌اید.
+        </p>
+    }
+    else
+    {
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:14px;">
+            @foreach (var c in Model.Classes)
+            {
+                var dayStr = string.Join("، ", c.Days.Select(x => dayNames[x]));
+                var typeStr = c.Type switch
+                {
+                    ClassType.InPerson => "حضوری",
+                    ClassType.Online => "مجازی",
+                    ClassType.Hybrid => "ترکیبی",
+                    _ => "—"
+                };
+
+                <div style="border:1px solid var(--qi-border); border-radius:10px; padding:16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:start;">
+                        <div>
+                            <div style="font-weight:700; font-size:15px;">@c.ClassName</div>
+                            <div style="font-size:12px; color:var(--qi-text-muted);">
+                                @c.StudentName — استاد: @c.TeacherName
+                            </div>
+                        </div>
+                        <span style="background:#0f766e; color:#fff; padding:3px 10px; border-radius:20px; font-size:11px;">
+                            @typeStr
+                        </span>
+                    </div>
+
+                    <div style="margin-top:10px; font-size:13px; color:#4b5563;">
+                        @if (!string.IsNullOrEmpty(c.ClassTime))
+                        {
+                            <div>⏰ @c.ClassTime</div>
+                        }
+                        <div>📅 @dayStr</div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(c.OnlineLink))
+                    {
+                        <a href="@c.OnlineLink" target="_blank" class="qi-btn sm blue" style="margin-top:10px;">
+                            🔗 ورود به کلاس
+                        </a>
+                    }
+
+                    <div style="display:flex; gap:14px; margin-top:10px; font-size:12px;">
+                        <span style="color:#16a34a;">حاضر: @c.PresentCount.ToPersianDigits()</span>
+                        <span style="color:#b91c1c;">غایب: @c.AbsentCount.ToPersianDigits()</span>
+                        <span style="color:#6b7280;">کل جلسات: @c.TotalSessions.ToPersianDigits()</span>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

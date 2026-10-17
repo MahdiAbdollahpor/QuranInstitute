@@ -1,0 +1,49 @@
+﻿@using QuranInstitute.Application.Features.UserPanel.Queries.GetMyProfile
+@using QuranInstitute.Shared.Helpers
+@{
+    ViewData["Title"] = "پروفایل";
+    var profile = ViewBag.Profile as MyProfileDto;
+}
+
+<div class="qi-card">
+    <h2>اطلاعات حساب</h2>
+    <table style="width:100%; border-collapse:collapse;">
+        <tr style="border-bottom:1px solid #e5eae9;">
+            <td style="padding:10px; color:var(--qi-text-muted); width:150px;">نام:</td>
+            <td style="padding:10px;">@profile?.FullName</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e5eae9;">
+            <td style="padding:10px; color:var(--qi-text-muted);">موبایل:</td>
+            <td style="padding:10px;" dir="ltr">@profile?.Mobile.ToPersianDigits()</td>
+        </tr>
+    </table>
+</div>
+
+@if (profile?.Students.Any() == true)
+{
+    <div class="qi-card">
+        <h2>شاگردان متصل</h2>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:12px;">
+            @foreach (var s in profile.Students)
+            {
+                <div style="background:#f3f6f5; padding:14px; border-radius:10px;">
+                    <div style="font-weight:700;">@s.Name</div>
+                    <div style="font-size:12px; color:var(--qi-text-muted); margin-top:4px;">
+                        کلاس: @s.ClassName
+                    </div>
+                    <div style="font-size:12px; color:var(--qi-text-muted);">
+                        شهریه: @s.MonthlyFee.ToString("N0").ToPersianDigits() تومان
+                    </div>
+                    <div style="font-size:12px; color:var(--qi-text-muted);">
+                        شروع: @s.StartDate.GetShamsiDateFromGregorian(time: false).ToPersianDigits()
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+<form method="post" action="/Account/Logout" style="margin-top:16px;">
+    @Html.AntiForgeryToken()
+    <button type="submit" class="qi-btn red">خروج از حساب</button>
+</form>

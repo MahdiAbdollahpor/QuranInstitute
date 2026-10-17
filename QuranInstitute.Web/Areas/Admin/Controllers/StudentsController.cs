@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using QuranInstitute.Application.Common.Models;
 using QuranInstitute.Application.Features.Students.Commands.CreateStudent;
+using QuranInstitute.Application.Features.Students.Commands.CreateStudentAccount;
 using QuranInstitute.Application.Features.Students.Commands.DeactivateStudent;
 using QuranInstitute.Application.Features.Students.Commands.UpdateStudent;
 using QuranInstitute.Application.Features.Students.Queries.GetClassesForSelect;
@@ -100,6 +101,22 @@ public class StudentsController : Controller
         }
 
         TempData["Success"] = "شاگرد با موفقیت ثبت شد.";
+        return RedirectToAction(nameof(Index));
+    }
+
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CreateAccount(
+    Guid studentId, string password, string role)
+    {
+        var result = await _mediator.Send(
+            new CreateStudentAccountCommand(studentId, password, role));
+
+        TempData[result.IsSuccess ? "Success" : "Error"] = result.IsSuccess
+            ? "حساب کاربری ساخته شد. کاربر می‌تواند با موبایل والد و رمز وارد شود."
+            : result.Error;
+
         return RedirectToAction(nameof(Index));
     }
 

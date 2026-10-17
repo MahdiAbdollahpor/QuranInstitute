@@ -10,6 +10,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
+
+
+
+
+
+builder.Services.AddScoped<UserManager<AppUser>>();
+builder.Services.AddScoped<RoleManager<AppRole>>();
+
 // ─── Identity ────────────────────────────────────────
 builder.Services
     .AddIdentity<AppUser, AppRole>(opt =>

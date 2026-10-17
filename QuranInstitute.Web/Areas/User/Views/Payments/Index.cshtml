@@ -1,0 +1,107 @@
+﻿@model QuranInstitute.Web.ViewModels.UserPanel.MyBalanceViewModel
+@using QuranInstitute.Shared.Helpers
+@{
+    ViewData["Title"] = "صورتحساب";
+    var d = Model.Data;
+}
+
+<div class="qi-card">
+    <h2>صورتحساب @d.StudentName</h2>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(160px,1fr)); gap:12px; margin:20px 0;">
+        <div style="background:#f3f6f5; padding:14px; border-radius:10px;">
+            <div style="font-size:12px; color:var(--qi-text-muted);">شهریه ماهانه</div>
+            <div style="font-size:16px; font-weight:700; margin-top:4px;">
+                @d.MonthlyFee.ToString("N0").ToPersianDigits() تومان
+            </div>
+        </div>
+        <div style="background:#f3f6f5; padding:14px; border-radius:10px;">
+            <div style="font-size:12px; color:var(--qi-text-muted);">تعداد ماه</div>
+            <div style="font-size:16px; font-weight:700; margin-top:4px;">
+                @d.MonthCount.ToPersianDigits()
+            </div>
+        </div>
+        <div style="background:#f3f6f5; padding:14px; border-radius:10px;">
+            <div style="font-size:12px; color:var(--qi-text-muted);">جمع بدهی</div>
+            <div style="font-size:16px; font-weight:700; margin-top:4px;">
+                @d.TotalOwed.ToString("N0").ToPersianDigits()
+            </div>
+        </div>
+        <div style="background:#f0fdf4; padding:14px; border-radius:10px;">
+            <div style="font-size:12px; color:#166534;">جمع پرداخت</div>
+            <div style="font-size:16px; font-weight:700; color:#16a34a; margin-top:4px;">
+                @d.TotalPaid.ToString("N0").ToPersianDigits()
+            </div>
+        </div>
+
+        @{
+            var bBg = d.Balance > 0 ? "#fef2f2" : d.Balance < 0 ? "#eff6ff" : "#f0fdf4";
+            var bColor = d.Balance > 0 ? "#b91c1c" : d.Balance < 0 ? "#1d4ed8" : "#16a34a";
+        }
+        <div style="background:@bBg; padding:14px; border-radius:10px;">
+            <div style="font-size:12px; color:@bColor;">مانده</div>
+            <div style="font-size:16px; font-weight:700; color:@bColor; margin-top:4px;">
+                @if (d.Balance > 0)
+                {
+                    <span>@d.Balance.ToString("N0").ToPersianDigits() بدهکار</span>
+                }
+                else if (d.Balance < 0)
+                {
+                    <span>@((-d.Balance).ToString("N0")).ToPersianDigits() بستانکار</span>
+                }
+                else
+                {
+                    <span>تسویه ✅</span>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div style="background:#fef3c7; padding:14px; border-radius:10px; font-size:13px; color:#92400e;">
+        💳 پرداخت آنلاین در گام بعدی اضافه خواهد شد. فعلاً برای پرداخت با موسسه تماس بگیرید.
+    </div>
+</div>
+
+@* تاریخچه پرداخت‌ها *@
+<div class="qi-card">
+    <h2>تاریخچه پرداخت‌ها</h2>
+
+    @if (!d.Payments.Any())
+    {
+        <p style="color:var(--qi-text-muted); text-align:center; padding:30px;">
+            هنوز پرداختی ثبت نشده است.
+        </p>
+    }
+    else
+    {
+        <table style="width:100%; border-collapse:collapse;">
+            <thead>
+                <tr style="background:#eef3f2; font-size:13px;">
+                    <th style="padding:10px; text-align:right;">تاریخ</th>
+                    <th style="padding:10px; text-align:right;">شماره رسید</th>
+                    <th style="padding:10px; text-align:right;">مبلغ</th>
+                    <th style="padding:10px; text-align:right;">روش</th>
+                    <th style="padding:10px; text-align:right;">توضیحات</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in d.Payments)
+                {
+                    <tr style="border-bottom:1px solid #e5eae9;">
+                        <td style="padding:10px; font-size:13px;">
+                            @p.Date.GetShamsiDateFromGregorian(time: false).ToPersianDigits()
+                        </td>
+                        <td style="padding:10px;">
+                            <code style="direction:ltr; display:inline-block;">@p.ReceiptNo</code>
+                        </td>
+                        <td style="padding:10px; font-weight:700; color:#16a34a;">
+                            @p.Amount.ToString("N0").ToPersianDigits() تومان
+                        </td>
+                        <td style="padding:10px;">@p.MethodName</td>
+                        <td style="padding:10px; font-size:12px; color:var(--qi-text-muted);">@p.Note</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
