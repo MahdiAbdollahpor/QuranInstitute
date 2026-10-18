@@ -1,0 +1,179 @@
+﻿@model QuranInstitute.Web.ViewModels.Admin.UserDetailsViewModel
+@using QuranInstitute.Shared.Helpers
+@{
+    ViewData["Title"] = $"کاربر: {Model.User.FullName}";
+    var u = Model.User;
+
+    var roleNames = new Dictionary<string, string>
+    {
+        { "Admin", "مدیر" },
+        { "Teacher", "استاد" },
+        { "Parent", "والد" },
+        { "Student", "شاگرد" }
+    };
+    var roleColors = new Dictionary<string, string>
+    {
+        { "Admin", "#b91c1c" },
+        { "Teacher", "#1d4ed8" },
+        { "Parent", "#0f766e" },
+        { "Student", "#16a34a" }
+    };
+}
+
+<div class="qi-card">
+    <div style="display:flex; justify-content:space-between; align-items:start; flex-wrap:wrap; gap:12px;">
+        <div>
+            <h2 style="margin:0;">@u.FullName</h2>
+            <div style="color:var(--qi-text-muted); font-size:13px; margin-top:6px;">
+                @foreach (var r in u.Roles)
+                {
+                    var label = roleNames.ContainsKey(r) ? roleNames[r] : r;
+                    var color = roleColors.ContainsKey(r) ? roleColors[r] : "#6b7280";
+                    <span style="background:@color; color:#fff; padding:3px 10px;
+                                     border-radius:20px; font-size:12px; margin-left:6px;">
+                        @label
+                    </span>
+                }
+            </div>
+        </div>
+        <a href="/Admin/Users" class="qi-btn gray">بازگشت</a>
+    </div>
+</div>
+
+<div class="qi-card">
+    <h3 style="color:var(--qi-primary-dark);">اطلاعات کاربر</h3>
+    <table style="width:100%; border-collapse:collapse;">
+        <tr style="border-bottom:1px solid #e5eae9;">
+            <td style="padding:10px; color:var(--qi-text-muted); width:180px;">موبایل:</td>
+            <td style="padding:10px;" dir="ltr">@u.Mobile.ToPersianDigits()</td>
+        </tr>
+        @if (!string.IsNullOrWhiteSpace(u.NationalCode))
+        {
+            <tr style="border-bottom:1px solid #e5eae9;">
+                <td style="padding:10px; color:var(--qi-text-muted);">کد ملی:</td>
+                <td style="padding:10px;">@u.NationalCode.ToPersianDigits()</td>
+            </tr>
+        }
+        @if (!string.IsNullOrWhiteSpace(u.Email))
+        {
+            <tr style="border-bottom:1px solid #e5eae9;">
+                <td style="padding:10px; color:var(--qi-text-muted);">ایمیل:</td>
+                <td style="padding:10px;" dir="ltr">@u.Email</td>
+            </tr>
+        }
+        <tr style="border-bottom:1px solid #e5eae9;">
+            <td style="padding:10px; color:var(--qi-text-muted);">تاریخ عضویت:</td>
+            <td style="padding:10px;">@u.CreatedAt.GetShamsiDateFromGregorian(time: true).ToPersianDigits()</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e5eae9;">
+            <td style="padding:10px; color:var(--qi-text-muted);">آخرین ورود:</td>
+            <td style="padding:10px;">
+                @if (u.LastLoginAt.HasValue)
+                {
+                    @u.LastLoginAt.Value.GetShamsiDateFromGregorian(time: true).ToPersianDigits()
+                }
+                else
+                {
+                    <span style="color:var(--qi-text-muted);">هرگز</span>
+                }
+            </td>
+        </tr>
+        <tr>
+            <td style="padding:10px; color:var(--qi-text-muted);">وضعیت:</td>
+            <td style="padding:10px;">
+                @if (u.IsActive)
+                {
+                    <span style="color:#16a34a;">✅ فعال</span>
+                }
+                else
+                {
+                    <span style="color:#b91c1c;">⛔ غیرفعال</span>
+                }
+            </td>
+        </tr>
+    </table>
+</div>
+
+@if (u.LinkedStudents.Any())
+{
+    <div class="qi-card">
+        <h3 style="color:var(--qi-primary-dark);">شاگردان مرتبط</h3>
+        <table style="width:100%; border-collapse:collapse;">
+            <thead>
+                <tr style="background:#f3f6f5; font-size:13px;">
+                    <th style="padding:8px; text-align:right;">نام شاگرد</th>
+                    <th style="padding:8px; text-align:right;">ولی</th>
+                    <th style="padding:8px; text-align:right;">کلاس</th>
+                    <th style="padding:8px; text-align:right;">وضعیت</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var s in u.LinkedStudents)
+                {
+                    <tr style="border-bottom:1px solid #e5eae9;">
+                        <td style="padding:8px;"><strong>@s.Name</strong></td>
+                        <td style="padding:8px;">@s.ParentName</td>
+                        <td style="padding:8px;">@s.ClassName</td>
+                        <td style="padding:8px;">
+                            @if (s.Active)
+                            {
+                                <span style="color:#16a34a;">فعال</span>
+                            }
+                            else
+                            {
+                                <span style="color:#b91c1c;">غیرفعال</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+<div class="qi-card">
+    <h3 style="color:var(--qi-primary-dark);">عملیات</h3>
+
+    @if (Model.IsCurrentUser)
+    {
+        <div style="background:#fef3c7; padding:12px; border-radius:8px; font-size:13px; color:#92400e;">
+            ⚠️ شما در حال مشاهده حساب خودتان هستید. برخی عملیات محدود است.
+        </div>
+    }
+
+    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;">
+
+        <a href="/Admin/Users/ResetPassword/@u.Id" class="qi-btn blue">
+            🔑 تغییر رمز
+        </a>
+
+        <a href="/Admin/Users/ChangeRole/@u.Id" class="qi-btn gray">
+            🔄 تغییر نقش
+        </a>
+
+        @if (!Model.IsCurrentUser)
+        {
+            @if (u.IsActive)
+            {
+                <form method="post" action="/Admin/Users/Deactivate/@u.Id" style="display:inline;"
+                      onsubmit="return confirm('این کاربر غیرفعال شود؟ از سیستم خارج می‌شود و نمی‌تواند وارد شود.');">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="qi-btn gray">⛔ غیرفعال‌سازی</button>
+                </form>
+            }
+            else
+            {
+                <form method="post" action="/Admin/Users/Activate/@u.Id" style="display:inline;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="qi-btn green">✅ فعال‌سازی</button>
+                </form>
+            }
+
+            <form method="post" action="/Admin/Users/Delete/@u.Id" style="display:inline;"
+                  onsubmit="return confirm('کاربر حذف شود؟ این عمل قابل بازگشت نیست!');">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="qi-btn red">🗑 حذف</button>
+            </form>
+        }
+    </div>
+</div>

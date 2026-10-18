@@ -1,0 +1,49 @@
+﻿@model QuranInstitute.Web.ViewModels.Admin.ChangeRoleViewModel
+@{
+    ViewData["Title"] = "تغییر نقش کاربر";
+}
+
+<div class="qi-card" style="max-width:500px;">
+    <h2>🔄 تغییر نقش کاربر</h2>
+
+    <div style="background:#f3f6f5; padding:12px; border-radius:8px; margin-bottom:16px; font-size:13px;">
+        کاربر: <b>@Model.UserFullName</b><br />
+        نقش فعلی: <b>@Model.CurrentRole</b>
+    </div>
+
+    <form method="post" action="/Admin/Users/ChangeRole" novalidate>
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="UserId" />
+        <input type="hidden" asp-for="CurrentRole" />
+        <input type="hidden" asp-for="UserFullName" />
+
+        @if (!ViewData.ModelState.IsValid && ViewData.ModelState[""]?.Errors.Count > 0)
+        {
+            <div style="background:#fef2f2; border:1px solid #fecaca; color:#b91c1c;
+                            padding:10px 14px; border-radius:8px; margin-bottom:16px; font-size:13px;">
+                @ViewData.ModelState[""]!.Errors.First().ErrorMessage
+            </div>
+        }
+
+        <div style="margin-bottom:20px;">
+            <label asp-for="NewRole" style="display:block; font-size:13px; margin-bottom:6px; font-weight:500;">
+                نقش جدید <span style="color:#b91c1c;">*</span>
+            </label>
+            <select asp-for="NewRole" asp-items="Model.RoleOptions"
+                    style="width:100%; padding:9px 12px; border:1px solid var(--qi-border);
+                           border-radius:8px; font-family:inherit;">
+            </select>
+            <span asp-validation-for="NewRole" style="color:#b91c1c; font-size:12px;"></span>
+        </div>
+
+        <div style="background:#fef3c7; border:1px solid #fde68a; padding:10px 14px;
+                    border-radius:8px; font-size:12px; color:#92400e; margin-bottom:16px;">
+            ⚠️ با تغییر نقش، کاربر از سیستم خارج می‌شود و باید دوباره وارد شود.
+        </div>
+
+        <div style="display:flex; gap:10px;">
+            <button type="submit" class="qi-btn">تغییر نقش</button>
+            <a href="/Admin/Users/Details/@Model.UserId" class="qi-btn gray">انصراف</a>
+        </div>
+    </form>
+</div>

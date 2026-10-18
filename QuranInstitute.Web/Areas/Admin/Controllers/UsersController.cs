@@ -2,71 +2,132 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using QuranInstitute.Application.Features.Admin.Users.Commands.ActivateUser;
+using QuranInstitute.Application.Features.Admin.Users.Commands.ChangeUserRole;
+using QuranInstitute.Application.Features.Admin.Users.Commands.DeactivateUser;
+using QuranInstitute.Application.Features.Admin.Users.Commands.DeleteUser;
 using QuranInstitute.Application.Features.Admin.Users.Commands.ResetUserPassword;
+using QuranInstitute.Application.Features.Admin.Users.Queries.GetUserDetails;
+using QuranInstitute.Application.Features.Admin.Users.Queries.GetUsersList;
+using QuranInstitute.Application.Common.Interfaces;
 using QuranInstitute.Domain.Constants;
-using QuranInstitute.Domain.Entities.Users;
 using QuranInstitute.Web.ViewModels.Admin;
 
 namespace QuranInstitute.Web.Areas.Admin.Controllers;
 
 [Area("Admin")]
 [Authorize(Roles = Roles.Admin)]
-public class UsersController : Controller
+public class UsersController : MediatorControllerBase
 {
-    private readonly IMediator _mediator;
-    private readonly UserManager<AppUser> _userMgr;
+    private readonly ICurrentUserService _current;
 
-    public UsersController(IMediator mediator, UserManager<AppUser> userMgr)
+    public UsersController(IMediator mediator, ICurrentUserService current)
+        : base(mediator)
     {
-        _mediator = mediator;
-        _userMgr = userMgr;
+        _current = current;
     }
 
     // ─── لیست کاربران ───
     [HttpGet]
-    public async Task<IActionResult> Index(string? search = null)
+    public async Task<IActionResult> Index(
+        string? search = null,
+        string? role = null,
+        bool? activeOnly = null,
+        int page = 1)
     {
         ViewData["Title"] = "کاربران";
 
-        var query = _userMgr.Users.AsNoTracking();
-
-        if (!string.IsNullOrWhiteSpace(search))
+        var result = await Mediator.Send(new GetUsersListQuery
         {
-            var s = search.Trim();
-            query = query.Where(u =>
-                u.FullName.Contains(s) ||
-                (u.UserName != null && u.UserName.Contains(s)) ||
-                (u.PhoneNumber != null && u.PhoneNumber.Contains(s)));
-        }
+            Search = search,
+            RoleFilter = role,
+            ActiveOnly = activeOnly,
+            Page = page,
+            PageSize = 30
+        });
 
-        var users = await query
-            .OrderByDescending(u => u.CreatedAt)
-            .Take(200)
-            .ToListAsync();
-
-        // نقش‌ها
-        var roleMap = new Dictionary<Guid, List<string>>();
-        foreach (var u in users)
+        return View(new UserListViewModel
         {
-            var roles = await _userMgr.GetRolesAsync(u);
-            roleMap[u.Id] = roles.ToList();
-        }
-
-        ViewBag.RoleMap = roleMap;
-        ViewBag.Search = search;
-
-        return View(users);
+            Users = result.IsSuccess ? result.Value! : new(),
+            Search = search,
+            RoleFilter = role,
+            ActiveOnly = activeOnly,
+            RoleOptions = BuildRoleOptions(role)
+        });
     }
 
-    // ─── تغییر رمز ───
+    // ─── جزئیات ───
+    [HttpGet]
+    public async Task<IActionResult> Details(Guid id)
+    {
+        var result = await Mediator.Send(new GetUserDetailsQuery(id));
+        if (!result.IsSuccess)
+        {
+            TempData["Error"] = result.Error;
+            return RedirectToAction(nameof(Index));
+        }
+
+        ViewData["Title"] = $"کاربر: {result.Value!.FullName}";
+
+        return View(new UserDetailsViewModel
+        {
+            User = result.Value!,
+            IsCurrentUser = _current.UserId == id
+        });
+    }
+
+    // ─── غیرفعال‌سازی ───
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Deactivate(Guid id)
+    {
+        var result = await Mediator.Send(new DeactivateUserCommand(id));
+
+        TempData[result.IsSuccess ? "Success" : "Error"] =
+            result.IsSuccess ? "کاربر غیرفعال شد." : result.Error;
+
+        return RedirectToAction(nameof(Details), new { id });
+    }
+
+    // ─── فعال‌سازی ───
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Activate(Guid id)
+    {
+        var result = await Mediator.Send(new ActivateUserCommand(id));
+
+        TempData[result.IsSuccess ? "Success" : "Error"] =
+            result.IsSuccess ? "کاربر فعال شد." : result.Error;
+
+        return RedirectToAction(nameof(Details), new { id });
+    }
+
+    // ─── حذف ───
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        var result = await Mediator.Send(new DeleteUserCommand(id));
+
+        if (!result.IsSuccess)
+        {
+            TempData["Error"] = result.Error;
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        TempData["Success"] = "کاربر حذف شد.";
+        return RedirectToAction(nameof(Index));
+    }
+
+    // ─── تغییر رمز ─── (موجود از گام قبل)
     [HttpGet]
     public async Task<IActionResult> ResetPassword(Guid id)
     {
-        var user = await _userMgr.FindByIdAsync(id.ToString());
-        if (user is null)
+        var result = await Mediator.Send(new GetUserDetailsQuery(id));
+        if (!result.IsSuccess)
         {
-            TempData["Error"] = "کاربر یافت نشد.";
+            TempData["Error"] = result.Error;
             return RedirectToAction(nameof(Index));
         }
 
@@ -74,8 +135,8 @@ public class UsersController : Controller
 
         return View(new ResetPasswordViewModel
         {
-            UserId = user.Id,
-            UserFullName = user.FullName
+            UserId = result.Value!.Id,
+            UserFullName = result.Value.FullName
         });
     }
 
@@ -88,7 +149,7 @@ public class UsersController : Controller
         if (!ModelState.IsValid)
             return View(vm);
 
-        var result = await _mediator.Send(
+        var result = await Mediator.Send(
             new ResetUserPasswordCommand(vm.UserId, vm.NewPassword));
 
         if (!result.IsSuccess)
@@ -97,7 +158,79 @@ public class UsersController : Controller
             return View(vm);
         }
 
-        TempData["Success"] = "رمز عبور کاربر با موفقیت تغییر کرد.";
-        return RedirectToAction(nameof(Index));
+        TempData["Success"] = "رمز عبور تغییر یافت.";
+        return RedirectToAction(nameof(Details), new { id = vm.UserId });
+    }
+
+    // ─── تغییر نقش ───
+    [HttpGet]
+    public async Task<IActionResult> ChangeRole(Guid id)
+    {
+        var result = await Mediator.Send(new GetUserDetailsQuery(id));
+        if (!result.IsSuccess)
+        {
+            TempData["Error"] = result.Error;
+            return RedirectToAction(nameof(Index));
+        }
+
+        var u = result.Value!;
+        var currentRole = u.Roles.FirstOrDefault() ?? "";
+
+        ViewData["Title"] = $"تغییر نقش {u.FullName}";
+
+        return View(new ChangeRoleViewModel
+        {
+            UserId = u.Id,
+            UserFullName = u.FullName,
+            CurrentRole = currentRole,
+            NewRole = currentRole,
+            RoleOptions = BuildRoleOptions(currentRole)
+        });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ChangeRole(ChangeRoleViewModel vm)
+    {
+        ViewData["Title"] = "تغییر نقش";
+
+        if (!ModelState.IsValid)
+        {
+            vm.RoleOptions = BuildRoleOptions(vm.CurrentRole);
+            return View(vm);
+        }
+
+        var result = await Mediator.Send(
+            new ChangeUserRoleCommand(vm.UserId, vm.NewRole));
+
+        if (!result.IsSuccess)
+        {
+            ModelState.AddModelError("", result.Error!);
+            vm.RoleOptions = BuildRoleOptions(vm.CurrentRole);
+            return View(vm);
+        }
+
+        TempData["Success"] = "نقش کاربر تغییر یافت.";
+        return RedirectToAction(nameof(Details), new { id = vm.UserId });
+    }
+
+    // ─── Helper ───
+    private static List<SelectListItem> BuildRoleOptions(string? selected)
+    {
+        var roles = new[]
+        {
+            (Value: "", Label: "همه نقش‌ها"),
+            (Value: "Admin", Label: "مدیر"),
+            (Value: "Teacher", Label: "استاد"),
+            (Value: "Parent", Label: "والد"),
+            (Value: "Student", Label: "شاگرد")
+        };
+
+        return roles.Select(r => new SelectListItem
+        {
+            Value = r.Value,
+            Text = r.Label,
+            Selected = r.Value == selected
+        }).ToList();
     }
 }
