@@ -39,6 +39,7 @@ public static class DependencyInjection
         services.AddScoped<IFileStorageService, LocalFileStorageService>();
         services.AddScoped<ISmsService, NullSmsService>();
         services.AddScoped<IWhatsAppService, WhatsAppLinkBuilder>();
+        services.AddScoped<IIdentityService, IdentityService>();
 
         return services;
     }

@@ -43,7 +43,12 @@
     </div>
 }
 
-<form method="post" action="/Account/Logout" style="margin-top:16px;">
-    @Html.AntiForgeryToken()
-    <button type="submit" class="qi-btn red">خروج از حساب</button>
-</form>
+<div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;">
+    <a href="/User/Profile/ChangePassword" class="qi-btn blue">🔒 تغییر رمز عبور</a>
+
+    <form method="post" action="/Account/Logout" style="margin:0;">
+        @Html.AntiForgeryToken()
+        <button type="submit" class="qi-btn red">خروج از حساب</button>
+    </form>
+</div>
+

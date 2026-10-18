@@ -107,14 +107,14 @@ public class StudentsController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> CreateAccount(
-    Guid studentId, string password, string role)
+    public async Task<IActionResult> CreateAccount(Guid studentId, string password)
     {
+        // ★ role حذف شد
         var result = await _mediator.Send(
-            new CreateStudentAccountCommand(studentId, password, role));
+            new CreateStudentAccountCommand(studentId, password));
 
         TempData[result.IsSuccess ? "Success" : "Error"] = result.IsSuccess
-            ? "حساب کاربری ساخته شد. کاربر می‌تواند با موبایل والد و رمز وارد شود."
+            ? "حساب کاربری ساخته شد. والد می‌تواند با موبایل خودش و رمز تعیین‌شده وارد شود."
             : result.Error;
 
         return RedirectToAction(nameof(Index));

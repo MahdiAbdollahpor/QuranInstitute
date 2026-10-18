@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Parbad.Builder;
+using Parbad.Gateway.ParbadVirtual;
 using QuranInstitute.Application;
 using QuranInstitute.Domain.Entities.Users;
 using QuranInstitute.Infrastructure;
@@ -12,7 +14,19 @@ builder.Services.AddInfrastructure(builder.Configuration);
 
 
 
-
+builder.Services.AddParbad()
+    .ConfigureGateways(gateways =>
+    {
+        // ★ درگاه مجازی برای تست
+        gateways
+            .AddParbadVirtual()
+            .WithOptions(options =>
+            {
+                options.GatewayPath = "/MyVirtualGateway";   // مسیر درگاه مجازی
+            });
+    })
+    .ConfigureHttpContext(builder => builder.UseDefaultAspNetCore())
+    .ConfigureStorage(builder => builder.UseMemoryCache());
 
 
 builder.Services.AddScoped<UserManager<AppUser>>();
@@ -73,6 +87,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+app.UseParbadVirtualGateway();
 
 app.UseAuthentication();   // ★ مهم: قبل از Authorization
 app.UseAuthorization();

@@ -120,25 +120,31 @@
             @Html.AntiForgeryToken()
             <input type="hidden" name="studentId" id="accStudentId" />
 
-            <div style="margin-bottom:14px;">
-                <label style="display:block; font-size:13px; margin-bottom:6px;">رمز عبور</label>
+            <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px;
+                padding:10px 14px; margin-bottom:14px; font-size:13px; color:#1e40af;">
+                💡 حساب برای <b>والد</b> ساخته می‌شود. ورود با موبایل والد و رمز زیر.
+            </div>
+
+            <div style="margin-bottom:20px;">
+                <label style="display:block; font-size:13px; margin-bottom:6px; font-weight:500;">
+                    رمز عبور اولیه
+                </label>
                 <input type="text" name="password" required minlength="6"
                        placeholder="حداقل ۶ کاراکتر"
                        value="123456"
-                       style="width:100%; padding:9px 12px; border:1px solid var(--qi-border); border-radius:8px; font-family:inherit;" />
-            </div>
-
-            <div style="margin-bottom:14px;">
-                <label style="display:block; font-size:13px; margin-bottom:6px;">نقش</label>
-                <select name="role" style="width:100%; padding:9px 12px; border:1px solid var(--qi-border); border-radius:8px; font-family:inherit;">
-                    <option value="Parent">والد</option>
-                    <option value="Student">شاگرد</option>
-                </select>
+                       style="width:100%; padding:9px 12px; border:1px solid var(--qi-border);
+                      border-radius:8px; font-family:inherit; direction:ltr;" />
+                <div style="font-size:11px; color:#6b7280; margin-top:4px;">
+                    کاربر می‌تواند بعداً از پنل خود رمز را تغییر دهد.
+                </div>
             </div>
 
             <div style="display:flex; gap:10px;">
-                <button type="submit" class="qi-btn">ساخت حساب</button>
-                <button type="button" class="qi-btn gray" onclick="document.getElementById('accountModal').style.display='none'">انصراف</button>
+                <button type="submit" class="qi-btn">✅ ساخت حساب</button>
+                <button type="button" class="qi-btn gray"
+                        onclick="document.getElementById('accountModal').style.display='none'">
+                    انصراف
+                </button>
             </div>
         </form>
     </div>

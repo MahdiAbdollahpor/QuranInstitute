@@ -1,0 +1,117 @@
+﻿@using QuranInstitute.Domain.Entities.Users
+@using QuranInstitute.Shared.Helpers
+@model List<AppUser>
+@{
+    ViewData["Title"] = "کاربران";
+
+    var roleMap = ViewBag.RoleMap as Dictionary<Guid, List<string>>
+                  ?? new Dictionary<Guid, List<string>>();
+
+    var roleNames = new Dictionary<string, string>
+    {
+        { "Admin", "مدیر" },
+        { "Teacher", "استاد" },
+        { "Parent", "والد" },
+        { "Student", "شاگرد" }
+    };
+
+    var roleColors = new Dictionary<string, string>
+    {
+        { "Admin", "#b91c1c" },
+        { "Teacher", "#1d4ed8" },
+        { "Parent", "#0f766e" },
+        { "Student", "#16a34a" }
+    };
+}
+
+<div class="qi-card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h2>لیست کاربران (@Model.Count)</h2>
+    </div>
+
+    <form method="get" style="display:flex; gap:10px; margin-bottom:16px;">
+        <input type="text" name="search" value="@ViewBag.Search"
+               placeholder="جستجو (نام، موبایل)…"
+               style="flex:1; padding:9px 12px; border:1px solid var(--qi-border);
+                      border-radius:8px; font-family:inherit;" />
+        <button type="submit" class="qi-btn">جستجو</button>
+        <a href="/Admin/Users" class="qi-btn gray">پاک‌کردن</a>
+    </form>
+
+    @if (!Model.Any())
+    {
+        <p style="color:var(--qi-text-muted); text-align:center; padding:30px;">
+            کاربری یافت نشد.
+        </p>
+    }
+    else
+    {
+        <div style="overflow-x:auto;">
+            <table style="width:100%; border-collapse:collapse;">
+                <thead>
+                    <tr style="background:#eef3f2; font-size:13px;">
+                        <th style="padding:10px; text-align:right;">#</th>
+                        <th style="padding:10px; text-align:right;">نام کامل</th>
+                        <th style="padding:10px; text-align:right;">موبایل</th>
+                        <th style="padding:10px; text-align:right;">نقش</th>
+                        <th style="padding:10px; text-align:right;">وضعیت</th>
+                        <th style="padding:10px; text-align:right;">آخرین ورود</th>
+                        <th style="padding:10px; text-align:right;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        var idx = 0;
+                    }
+                    @foreach (var u in Model)
+                    {
+                        idx++;
+                        var roles = roleMap.ContainsKey(u.Id) ? roleMap[u.Id] : new List<string>();
+                        var primaryRole = roles.FirstOrDefault() ?? "—";
+                        var roleLabel = roleNames.ContainsKey(primaryRole) ? roleNames[primaryRole] : primaryRole;
+                        var roleColor = roleColors.ContainsKey(primaryRole) ? roleColors[primaryRole] : "#6b7280";
+
+                        <tr style="border-bottom:1px solid #e5eae9;">
+                            <td style="padding:10px;">@idx.ToPersianDigits()</td>
+                            <td style="padding:10px;"><strong>@u.FullName</strong></td>
+                            <td style="padding:10px; direction:ltr; text-align:right;">
+                                @u.PhoneNumber.ToPersianDigits()
+                            </td>
+                            <td style="padding:10px;">
+                                <span style="background:@roleColor; color:#fff; padding:3px 10px;
+                                                     border-radius:20px; font-size:12px;">
+                                    @roleLabel
+                                </span>
+                            </td>
+                            <td style="padding:10px;">
+                                @if (u.IsActive)
+                                {
+                                    <span style="color:#16a34a; font-size:13px;">✅ فعال</span>
+                                }
+                                else
+                                {
+                                    <span style="color:#b91c1c; font-size:13px;">⛔ غیرفعال</span>
+                                }
+                            </td>
+                            <td style="padding:10px; font-size:13px;">
+                                @if (u.LastLoginAt.HasValue)
+                                {
+                                    @u.LastLoginAt.Value.GetShamsiDateFromGregorian(time: true).ToPersianDigits()
+                                }
+                                else
+                                {
+                                    <span style="color:var(--qi-text-muted);">—</span>
+                                }
+                            </td>
+                            <td style="padding:10px; white-space:nowrap;">
+                                <a href="/Admin/Users/ResetPassword/@u.Id" class="qi-btn sm blue">
+                                    🔑 تغییر رمز
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

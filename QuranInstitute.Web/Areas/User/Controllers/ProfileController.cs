@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using QuranInstitute.Application.Features.UserPanel.Commands.ChangeMyPassword;
 using QuranInstitute.Application.Features.UserPanel.Queries.GetMyProfile;
 using QuranInstitute.Web.ViewModels.UserPanel;
 
@@ -24,5 +25,39 @@ public class ProfileController : Controller
 
         ViewBag.Profile = result.Value;
         return View();
+    }
+
+    // ─── تغییر رمز ───
+    [HttpGet]
+    public IActionResult ChangePassword()
+    {
+        ViewData["Title"] = "تغییر رمز عبور";
+        return View(new ChangePasswordViewModel());
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ChangePassword(ChangePasswordViewModel vm)
+    {
+        ViewData["Title"] = "تغییر رمز عبور";
+
+        if (!ModelState.IsValid)
+            return View(vm);
+
+        var result = await _mediator.Send(new ChangeMyPasswordCommand
+        {
+            CurrentPassword = vm.CurrentPassword,
+            NewPassword = vm.NewPassword,
+            ConfirmPassword = vm.ConfirmPassword
+        });
+
+        if (!result.IsSuccess)
+        {
+            ModelState.AddModelError("", result.Error!);
+            return View(vm);
+        }
+
+        TempData["Success"] = "رمز عبور با موفقیت تغییر کرد.";
+        return RedirectToAction(nameof(Index));
     }
 }
