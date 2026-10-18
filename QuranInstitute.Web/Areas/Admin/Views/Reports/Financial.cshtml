@@ -1,0 +1,99 @@
+﻿@model QuranInstitute.Web.ViewModels.Reports.FinancialReportViewModel
+@using QuranInstitute.Shared.Helpers
+@{
+    ViewData["Title"] = $"گزارش مالی {Model.Data.FromDate.GetShamsiDateFromGregorian(time: false)}";
+    var monthNames = new[] { "فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور", "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند" };
+}
+
+<div class="qi-card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
+        <h2>💰 گزارش مالی — @monthNames[Model.SelectedMonth - 1] @Model.SelectedYear.ToPersianDigits()</h2>
+        <a href="/Admin/Reports" class="qi-btn gray">بازگشت</a>
+    </div>
+
+    <form method="get" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px;">
+        <select name="month" style="padding:9px 12px; border:1px solid var(--qi-border); border-radius:8px; font-family:inherit;">
+            @for (int i = 1; i <= 12; i++)
+            {
+                <option value="@i" selected="@(i == Model.SelectedMonth)">@monthNames[i - 1]</option>
+            }
+        </select>
+
+        <input type="number" name="year" value="@Model.SelectedYear" min="1400" max="1450"
+               style="padding:9px 12px; border:1px solid var(--qi-border); border-radius:8px; font-family:inherit; width:120px;" />
+
+        <button type="submit" class="qi-btn">نمایش</button>
+    </form>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(170px,1fr)); gap:12px; margin-bottom:20px;">
+        <div style="background:#f0fdf4; padding:14px; border-radius:10px;">
+            <div style="font-size:12px; color:#166534;">جمع دریافتی</div>
+            <div style="font-size:20px; font-weight:700; color:#16a34a; margin-top:4px;">
+                @Model.Data.TotalIncome.ToString("N0").ToPersianDigits() تومان
+            </div>
+        </div>
+
+        <div style="background:#f3f6f5; padding:14px; border-radius:10px;">
+            <div style="font-size:12px; color:var(--qi-text-muted);">تعداد پرداخت</div>
+            <div style="font-size:20px; font-weight:700; margin-top:4px;">
+                @Model.Data.PaymentCount.ToPersianDigits()
+            </div>
+        </div>
+
+        <div style="background:#f3f6f5; padding:14px; border-radius:10px;">
+            <div style="font-size:12px; color:var(--qi-text-muted);">میانگین پرداخت</div>
+            <div style="font-size:20px; font-weight:700; margin-top:4px;">
+                @Model.Data.AveragePayment.ToString("N0").ToPersianDigits()
+            </div>
+        </div>
+    </div>
+
+    @if (Model.Data.ByMethod.Any())
+    {
+        <h3 style="color:var(--qi-primary-dark);">به تفکیک روش پرداخت</h3>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px,1fr)); gap:12px; margin-bottom:20px;">
+            @foreach (var m in Model.Data.ByMethod)
+            {
+                <div style="background:#f3f6f5; padding:12px; border-radius:10px;">
+                    <div style="font-size:13px; color:var(--qi-text-muted);">@m.MethodName</div>
+                    <div style="font-size:16px; font-weight:700; margin-top:4px;">
+                        @m.Total.ToString("N0").ToPersianDigits()
+                    </div>
+                    <div style="font-size:12px; color:var(--qi-text-muted); margin-top:4px;">
+                        @m.Count.ToPersianDigits() پرداخت — @m.Percent.ToString("N1").ToPersianDigits()%
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    @if (Model.Data.DailyBreakdown.Any())
+    {
+        <h3 style="color:var(--qi-primary-dark);">ریز روزانه</h3>
+        <div style="overflow-x:auto;">
+            <table style="width:100%; border-collapse:collapse;">
+                <thead>
+                    <tr style="background:#eef3f2; font-size:13px;">
+                        <th style="padding:8px; text-align:right;">تاریخ</th>
+                        <th style="padding:8px; text-align:right;">مبلغ</th>
+                        <th style="padding:8px; text-align:right;">تعداد</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var d in Model.Data.DailyBreakdown)
+                    {
+                        <tr style="border-bottom:1px solid #e5eae9;">
+                            <td style="padding:8px; font-size:13px;">
+                                @d.Date.GetShamsiDateFromGregorian(time: false).ToPersianDigits()
+                            </td>
+                            <td style="padding:8px; color:#16a34a; font-weight:700;">
+                                @d.Amount.ToString("N0").ToPersianDigits()
+                            </td>
+                            <td style="padding:8px;">@d.Count.ToPersianDigits()</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

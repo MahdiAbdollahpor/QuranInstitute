@@ -1,0 +1,16 @@
+﻿@model QuranInstitute.Web.ViewModels.Sessions.CreateSessionViewModel
+@using QuranInstitute.Shared.Helpers
+@{
+    ViewData["Title"] = "تعریف جلسه جدید";
+    ViewBag.SubmitLabel = "ثبت جلسه";
+    ViewBag.FormAction = "/Admin/Sessions/Create";
+}
+
+<div class="qi-card">
+    <h2>تعریف جلسه جدید برای @Model.ClassName</h2>
+    <partial name="_SessionForm" model="Model" />
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

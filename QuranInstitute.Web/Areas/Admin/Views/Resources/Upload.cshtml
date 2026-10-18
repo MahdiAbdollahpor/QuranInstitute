@@ -1,0 +1,121 @@
+﻿@model QuranInstitute.Web.ViewModels.Resources.UploadResourceViewModel
+@using QuranInstitute.Domain.Enums
+@{
+    ViewData["Title"] = "آپلود فایل جدید";
+}
+
+<div class="qi-card">
+    <h2>آپلود فایل برای @Model.ClassName</h2>
+
+    <form method="post" action="/Admin/Resources/Upload" enctype="multipart/form-data" novalidate>
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="ClassId" />
+
+        @if (!ViewData.ModelState.IsValid && ViewData.ModelState[""]?.Errors.Count > 0)
+        {
+            <div style="background:#fef2f2; border:1px solid #fecaca; color:#b91c1c;
+                            padding:10px 14px; border-radius:8px; margin-bottom:16px; font-size:13px;">
+                @ViewData.ModelState[""]!.Errors.First().ErrorMessage
+            </div>
+        }
+
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:16px;">
+
+            <div>
+                <label asp-for="Type" style="display:block; font-size:13px; margin-bottom:6px; color:#4b5563; font-weight:500;">
+                    نوع منبع <span style="color:#b91c1c;">*</span>
+                </label>
+                <select asp-for="Type" asp-items="Model.TypeOptions" id="typeSelect"
+                        style="width:100%; padding:9px 12px; border:1px solid var(--qi-border);
+                               border-radius:8px; font-family:inherit;"></select>
+            </div>
+
+            <div>
+                <label asp-for="SessionId" style="display:block; font-size:13px; margin-bottom:6px; color:#4b5563; font-weight:500;">
+                    جلسه (اختیاری)
+                </label>
+                <select asp-for="SessionId" asp-items="Model.Sessions"
+                        style="width:100%; padding:9px 12px; border:1px solid var(--qi-border);
+                               border-radius:8px; font-family:inherit;">
+                    <option value="">— مستقل از جلسه —</option>
+                </select>
+            </div>
+
+            <div style="grid-column:1/-1;">
+                <label asp-for="Title" style="display:block; font-size:13px; margin-bottom:6px; color:#4b5563; font-weight:500;">
+                    عنوان <span style="color:#b91c1c;">*</span>
+                </label>
+                <input asp-for="Title" type="text"
+                       style="width:100%; padding:9px 12px; border:1px solid var(--qi-border);
+                              border-radius:8px; font-family:inherit;" />
+                <span asp-validation-for="Title" style="color:#b91c1c; font-size:12px;"></span>
+            </div>
+
+            <div style="grid-column:1/-1;">
+                <label asp-for="Description" style="display:block; font-size:13px; margin-bottom:6px; color:#4b5563; font-weight:500;">
+                    توضیحات
+                </label>
+                <textarea asp-for="Description" rows="2"
+                          style="width:100%; padding:9px 12px; border:1px solid var(--qi-border);
+                                 border-radius:8px; font-family:inherit; resize:vertical;"></textarea>
+            </div>
+
+            <div style="grid-column:1/-1;" id="fileWrapper">
+                <label asp-for="File" style="display:block; font-size:13px; margin-bottom:6px; color:#4b5563; font-weight:500;">
+                    فایل <span style="color:#b91c1c;">*</span>
+                </label>
+                <input asp-for="File" type="file"
+                       style="width:100%; padding:8px; border:1px solid var(--qi-border);
+                              border-radius:8px; font-family:inherit; background:#fff;" />
+                <div style="font-size:11px; color:#6b7280; margin-top:4px;">
+                    حداکثر حجم: ۵۰۰ مگابایت
+                </div>
+                <span asp-validation-for="File" style="color:#b91c1c; font-size:12px;"></span>
+            </div>
+
+            <div style="grid-column:1/-1; display:none;" id="linkWrapper">
+                <label asp-for="ExternalUrl" style="display:block; font-size:13px; margin-bottom:6px; color:#4b5563; font-weight:500;">
+                    آدرس لینک <span style="color:#b91c1c;">*</span>
+                </label>
+                <input asp-for="ExternalUrl" type="url" dir="ltr"
+                       placeholder="https://..."
+                       style="width:100%; padding:9px 12px; border:1px solid var(--qi-border);
+                              border-radius:8px; font-family:inherit;" />
+                <span asp-validation-for="ExternalUrl" style="color:#b91c1c; font-size:12px;"></span>
+            </div>
+
+            <div style="grid-column:1/-1;">
+                <label style="display:inline-flex; align-items:center; gap:8px; cursor:pointer;">
+                    <input asp-for="EnrolledOnly" type="checkbox" style="width:auto;" />
+                    <span>فقط برای شاگردان ثبت‌نام‌شده قابل مشاهده باشد</span>
+                </label>
+            </div>
+        </div>
+
+        <div style="margin-top:24px; display:flex; gap:10px;">
+            <button type="submit" class="qi-btn">آپلود</button>
+            <a href="/Admin/Resources?classId=@Model.ClassId" class="qi-btn gray">انصراف</a>
+        </div>
+    </form>
+</div>
+
+<script>
+    (function () {
+        var sel = document.getElementById('typeSelect');
+        var fileW = document.getElementById('fileWrapper');
+        var linkW = document.getElementById('linkWrapper');
+
+        function toggle() {
+            // ResourceType.Link = 5
+            var isLink = sel.value === '5';
+            fileW.style.display = isLink ? 'none' : '';
+            linkW.style.display = isLink ? '' : 'none';
+        }
+        sel.addEventListener('change', toggle);
+        toggle();
+    })();
+</script>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

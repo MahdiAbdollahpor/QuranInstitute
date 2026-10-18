@@ -1,0 +1,100 @@
+﻿@model QuranInstitute.Web.ViewModels.Reports.AttendanceReportViewModel
+@using QuranInstitute.Shared.Helpers
+@{
+    ViewData["Title"] = $"گزارش حضور {Model.Data.MonthName} {Model.SelectedYear}";
+    var monthNames = new[] { "فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور", "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند" };
+}
+
+<div class="qi-card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
+        <h2>📅 گزارش حضور — @Model.Data.MonthName @Model.SelectedYear.ToPersianDigits()</h2>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <a href="/Admin/Reports/ExportAttendanceCsv?year=@Model.SelectedYear&month=@Model.SelectedMonth"
+               class="qi-btn sm green">📥 CSV</a>
+            <a href="/Admin/Reports" class="qi-btn gray">بازگشت</a>
+        </div>
+    </div>
+
+    <form method="get" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px;">
+        <select name="month" style="padding:9px 12px; border:1px solid var(--qi-border); border-radius:8px; font-family:inherit;">
+            @for (int i = 1; i <= 12; i++)
+            {
+                <option value="@i" selected="@(i == Model.SelectedMonth)">@monthNames[i - 1]</option>
+            }
+        </select>
+
+        <input type="number" name="year" value="@Model.SelectedYear" min="1400" max="1450"
+               style="padding:9px 12px; border:1px solid var(--qi-border); border-radius:8px; font-family:inherit; width:120px;" />
+
+        <select name="classId" style="padding:9px 12px; border:1px solid var(--qi-border); border-radius:8px; font-family:inherit; min-width:180px;">
+            <option value="">همه کلاس‌ها</option>
+            @foreach (var c in Model.Classes)
+            {
+                <option value="@c.Value" selected="@(c.Selected)">@c.Text</option>
+            }
+        </select>
+
+        <button type="submit" class="qi-btn">نمایش</button>
+    </form>
+
+    @if (!Model.Data.Classes.Any())
+    {
+        <p style="color:var(--qi-text-muted); text-align:center; padding:30px;">
+            در این ماه اطلاعات حضور و غیابی ثبت نشده است.
+        </p>
+    }
+    else
+    {
+        foreach (var cls in Model.Data.Classes)
+        {
+            <div style="margin-bottom:24px;">
+                <div style="background:#eef3f2; padding:12px 16px; border-radius:10px; margin-bottom:10px;
+                                    display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+                    <div>
+                        <strong>@cls.ClassName</strong>
+                        <span style="color:var(--qi-text-muted); font-size:12px;">— استاد: @cls.TeacherName</span>
+                    </div>
+                    <div style="font-size:13px; color:var(--qi-text-muted);">
+                        @cls.TotalStudents.ToPersianDigits() شاگرد — @cls.SessionsRecorded.ToPersianDigits() جلسه ثبت‌شده
+                    </div>
+                </div>
+
+                <div style="overflow-x:auto;">
+                    <table style="width:100%; border-collapse:collapse;">
+                        <thead>
+                            <tr style="background:#f3f6f5; font-size:13px;">
+                                <th style="padding:8px; text-align:right;">شاگرد</th>
+                                <th style="padding:8px; text-align:right;">حاضر</th>
+                                <th style="padding:8px; text-align:right;">غایب</th>
+                                <th style="padding:8px; text-align:right;">تأخیر</th>
+                                <th style="padding:8px; text-align:right;">موجه</th>
+                                <th style="padding:8px; text-align:right;">درصد حضور</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var s in cls.Students)
+                            {
+                                var rateColor = s.AttendanceRate >= 80 ? "#16a34a"
+                                : s.AttendanceRate >= 60 ? "#b45309"
+                                : "#b91c1c";
+
+                                <tr style="border-bottom:1px solid #e5eae9;">
+                                    <td style="padding:8px;"><strong>@s.StudentName</strong></td>
+                                    <td style="padding:8px; color:#16a34a;">@s.PresentCount.ToPersianDigits()</td>
+                                    <td style="padding:8px; color:#b91c1c;">@s.AbsentCount.ToPersianDigits()</td>
+                                    <td style="padding:8px; color:#b45309;">@s.LateCount.ToPersianDigits()</td>
+                                    <td style="padding:8px; color:#1d4ed8;">@s.ExcusedCount.ToPersianDigits()</td>
+                                    <td style="padding:8px;">
+                                        <span style="color:@rateColor; font-weight:700;">
+                                            @s.AttendanceRate.ToString("N1").ToPersianDigits()%
+                                        </span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+    }
+</div>

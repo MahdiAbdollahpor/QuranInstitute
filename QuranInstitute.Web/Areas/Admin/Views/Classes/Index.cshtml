@@ -82,6 +82,8 @@
                             </td>
                             <td style="padding:10px; white-space:nowrap;">
                                 <a href="/Admin/Enrollments/ClassStudents/@c.Id" class="qi-btn sm blue">شاگردان</a>
+                                <a href="/Admin/Sessions?classId=@c.Id" class="qi-btn sm blue">📅 جلسات</a>
+                                <a href="/Admin/Resources?classId=@c.Id" class="qi-btn sm gray">📁 فایل‌ها</a>
                                 <a href="/Admin/Classes/Edit/@c.Id" class="qi-btn sm">ویرایش</a>
                                 <form method="post" action="/Admin/Classes/Deactivate/@c.Id"
                                       style="display:inline;"

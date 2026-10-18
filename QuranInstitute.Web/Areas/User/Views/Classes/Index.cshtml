@@ -60,6 +60,11 @@
                         </a>
                     }
 
+                    <div style="display:flex; gap:6px; margin-top:10px; flex-wrap:wrap;">
+                        <a href="/User/Sessions?classId=@c.ClassId" class="qi-btn sm blue">📅 جلسات</a>
+                        <a href="/User/Resources?classId=@c.ClassId" class="qi-btn sm gray">📁 فایل‌ها</a>
+                    </div>
+
                     <div style="display:flex; gap:14px; margin-top:10px; font-size:12px;">
                         <span style="color:#16a34a;">حاضر: @c.PresentCount.ToPersianDigits()</span>
                         <span style="color:#b91c1c;">غایب: @c.AbsentCount.ToPersianDigits()</span>

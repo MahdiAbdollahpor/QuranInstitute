@@ -1,0 +1,98 @@
+﻿@model QuranInstitute.Web.ViewModels.Sessions.SessionsListViewModel
+@using QuranInstitute.Shared.Helpers
+@{
+    ViewData["Title"] = $"جلسات {Model.Data.ClassName}";
+}
+
+<div class="qi-card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
+        <div>
+            <h2 style="margin:0 0 4px;">جلسات کلاس @Model.Data.ClassName</h2>
+            <small style="color:var(--qi-text-muted);">استاد: @Model.Data.TeacherName</small>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <a href="/Admin/Sessions/Create?classId=@Model.Data.ClassId" class="qi-btn green">
+                + جلسه جدید
+            </a>
+            <a href="/Admin/Resources?classId=@Model.Data.ClassId" class="qi-btn blue">
+                📁 فایل‌های کلاس
+            </a>
+            <a href="/Admin/Classes" class="qi-btn gray">بازگشت</a>
+        </div>
+    </div>
+
+    @if (!Model.Data.Sessions.Any())
+    {
+        <p style="color:var(--qi-text-muted); text-align:center; padding:40px;">
+            هنوز جلسه‌ای تعریف نشده است.
+        </p>
+    }
+    else
+    {
+        <div style="overflow-x:auto;">
+            <table style="width:100%; border-collapse:collapse;">
+                <thead>
+                    <tr style="background:#eef3f2; font-size:13px;">
+                        <th style="padding:10px; text-align:right;">#</th>
+                        <th style="padding:10px; text-align:right;">تاریخ</th>
+                        <th style="padding:10px; text-align:right;">عنوان</th>
+                        <th style="padding:10px; text-align:right;">نوع</th>
+                        <th style="padding:10px; text-align:right;">فایل‌ها</th>
+                        <th style="padding:10px; text-align:right;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var s in Model.Data.Sessions)
+                    {
+                        <tr style="border-bottom:1px solid #e5eae9;">
+                            <td style="padding:10px; font-weight:700;">
+                                جلسه @s.SessionNumber.ToPersianDigits()
+                            </td>
+                            <td style="padding:10px; font-size:13px;">
+                                @s.Date.GetShamsiDateFromGregorian(time: false).ToPersianDigits()
+                            </td>
+                            <td style="padding:10px;">
+                                <strong>@s.Title</strong>
+                                @if (!string.IsNullOrEmpty(s.Description))
+                                {
+                                    <div style="font-size:12px; color:var(--qi-text-muted); margin-top:2px;">
+                                        @s.Description
+                                    </div>
+                                }
+                            </td>
+                            <td style="padding:10px;">
+                                @if (s.IsOnline)
+                                {
+                                    <span style="background:#1d4ed8; color:#fff; padding:3px 10px;
+                                                             border-radius:20px; font-size:11px;">آنلاین</span>
+                                }
+                                else
+                                {
+                                    <span style="background:#0f766e; color:#fff; padding:3px 10px;
+                                                             border-radius:20px; font-size:11px;">حضوری</span>
+                                }
+                            </td>
+                            <td style="padding:10px;">
+                                <span style="background:#f3f6f5; padding:3px 10px; border-radius:20px; font-size:12px;">
+                                    @s.ResourceCount.ToPersianDigits()
+                                </span>
+                            </td>
+                            <td style="padding:10px; white-space:nowrap;">
+                                <a href="/Admin/Resources?classId=@s.ClassId&sessionId=@s.Id"
+                                   class="qi-btn sm blue">فایل‌ها</a>
+                                <a href="/Admin/Sessions/Edit/@s.Id" class="qi-btn sm">ویرایش</a>
+                                <form method="post" action="/Admin/Sessions/Delete/@s.Id"
+                                      style="display:inline;"
+                                      onsubmit="return confirm('جلسه حذف شود؟ فایل‌های آن حفظ می‌شوند.');">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="classId" value="@s.ClassId" />
+                                    <button type="submit" class="qi-btn sm red">حذف</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

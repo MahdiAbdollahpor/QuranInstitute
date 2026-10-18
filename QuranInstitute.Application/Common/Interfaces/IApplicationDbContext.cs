@@ -3,6 +3,7 @@ using QuranInstitute.Domain.Entities.Attendances;
 using QuranInstitute.Domain.Entities.Communication;
 using QuranInstitute.Domain.Entities.Education;
 using QuranInstitute.Domain.Entities.Financial;
+using QuranInstitute.Domain.Entities.System;
 using QuranInstitute.Domain.Entities.Users;
 
 namespace QuranInstitute.Application.Common.Interfaces;
@@ -25,5 +26,9 @@ public interface IApplicationDbContext
     DbSet<Notification> Notifications { get; }
     DbSet<MessageTemplate> MessageTemplates { get; }
 
+    DbSet<AppSettings> AppSettings { get; }
+
     Task<int> SaveChangesAsync(CancellationToken ct = default);
+
+
 }

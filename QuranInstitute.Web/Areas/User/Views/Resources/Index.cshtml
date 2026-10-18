@@ -1,0 +1,92 @@
+﻿@model QuranInstitute.Web.ViewModels.Resources.ResourcesListViewModel
+@using QuranInstitute.Shared.Helpers
+@using QuranInstitute.Domain.Enums
+@{
+    ViewData["Title"] = $"فایل‌های {Model.ClassName}";
+
+    var typeIcons = new Dictionary<ResourceType, string>
+    {
+        { ResourceType.Video, "🎬" },
+        { ResourceType.Audio, "🎵" },
+        { ResourceType.Pdf, "📄" },
+        { ResourceType.Image, "🖼️" },
+        { ResourceType.Link, "🔗" },
+        { ResourceType.Other, "📦" }
+    };
+
+    var typeNames = new Dictionary<ResourceType, string>
+    {
+        { ResourceType.Video, "فیلم" },
+        { ResourceType.Audio, "صوت" },
+        { ResourceType.Pdf, "جزوه" },
+        { ResourceType.Image, "تصویر" },
+        { ResourceType.Link, "لینک" },
+        { ResourceType.Other, "سایر" }
+    };
+}
+
+<div class="qi-card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
+        <h2>فایل‌های کلاس @Model.ClassName</h2>
+        <div style="display:flex; gap:8px;">
+            <a href="/User/Sessions?classId=@Model.ClassId" class="qi-btn blue">
+                📅 جلسات
+            </a>
+            <a href="/User/Classes" class="qi-btn gray">بازگشت</a>
+        </div>
+    </div>
+
+    @if (!Model.Resources.Any())
+    {
+        <p style="color:var(--qi-text-muted); text-align:center; padding:40px;">
+            هنوز فایلی برای این کلاس آپلود نشده است.
+        </p>
+    }
+    else
+    {
+        <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(250px,1fr)); gap:12px;">
+            @foreach (var r in Model.Resources)
+            {
+                <div style="border:1px solid var(--qi-border); border-radius:10px; padding:14px;">
+                    <div style="display:flex; justify-content:space-between; align-items:start; gap:8px;">
+                        <div style="font-size:22px;">@typeIcons[r.Type]</div>
+                        <span style="background:#f3f6f5; padding:2px 8px; border-radius:10px; font-size:11px;">
+                            @typeNames[r.Type]
+                        </span>
+                    </div>
+
+                    <div style="font-weight:700; margin-top:8px;">@r.Title</div>
+
+                    @if (!string.IsNullOrEmpty(r.Description))
+                    {
+                        <div style="font-size:12px; color:var(--qi-text-muted); margin-top:4px;">
+                            @r.Description
+                        </div>
+                    }
+
+                    @if (r.SessionNumber.HasValue)
+                    {
+                        <div style="font-size:12px; color:#1d4ed8; margin-top:6px;">
+                            📅 جلسه @r.SessionNumber.Value.ToPersianDigits()
+                        </div>
+                    }
+
+                    <div style="margin-top:12px;">
+                        @if (r.Type == ResourceType.Video)
+                        {
+                            <a href="@r.PublicUrl" target="_blank" class="qi-btn sm green">▶ تماشا</a>
+                        }
+                        else if (r.Type == ResourceType.Link)
+                        {
+                            <a href="@r.PublicUrl" target="_blank" class="qi-btn sm blue">🔗 باز کردن</a>
+                        }
+                        else
+                        {
+                            <a href="@r.PublicUrl" target="_blank" download class="qi-btn sm">⬇ دانلود</a>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

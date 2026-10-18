@@ -1,0 +1,119 @@
+﻿@model QuranInstitute.Web.ViewModels.Sessions.BaseSessionFormViewModel
+@{
+    var submitLabel = (string?)ViewBag.SubmitLabel ?? "ذخیره";
+    var formAction = (string?)ViewBag.FormAction ?? "";
+}
+
+<form method="post" action="@formAction" novalidate>
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="ClassId" />
+
+    @if (!ViewData.ModelState.IsValid && ViewData.ModelState[""]?.Errors.Count > 0)
+    {
+        <div style="background:#fef2f2; border:1px solid #fecaca; color:#b91c1c;
+                        padding:10px 14px; border-radius:8px; margin-bottom:16px; font-size:13px;">
+            @ViewData.ModelState[""]!.Errors.First().ErrorMessage
+        </div>
+    }
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:16px;">
+
+        <div>
+            <label asp-for="SessionNumber" style="display:block; font-size:13px; margin-bottom:6px; color:#4b5563; font-weight:500;">
+                شماره جلسه <span style="color:#b91c1c;">*</span>
+            </label>
+            <input asp-for="SessionNumber" type="number" min="1"
+                   style="width:100%; padding:9px 12px; border:1px solid var(--qi-border);
+                          border-radius:8px; font-family:inherit;" />
+            <span asp-validation-for="SessionNumber" style="color:#b91c1c; font-size:12px;"></span>
+        </div>
+
+        <div>
+            <label asp-for="Date" style="display:block; font-size:13px; margin-bottom:6px; color:#4b5563; font-weight:500;">
+                تاریخ جلسه <span style="color:#b91c1c;">*</span>
+            </label>
+            <input type="text"
+                   class="persian-date-input"
+                   data-target="SessionDate_hidden"
+                   placeholder="1403/08/12"
+                   value="@Model.Date.GetShamsiDateFromGregorian(time: false)"
+                   autocomplete="off"
+                   inputmode="numeric"
+                   dir="ltr"
+                   style="width:100%; padding:9px 12px; border:1px solid var(--qi-border);
+                          border-radius:8px; font-family:inherit; text-align:left;" />
+            <input type="hidden" name="Date" id="SessionDate_hidden"
+                   value="@Model.Date.ToString("yyyy-MM-dd")" />
+            <span asp-validation-for="Date" style="color:#b91c1c; font-size:12px;"></span>
+        </div>
+
+        <div style="grid-column:1/-1;">
+            <label asp-for="Title" style="display:block; font-size:13px; margin-bottom:6px; color:#4b5563; font-weight:500;">
+                عنوان/موضوع جلسه <span style="color:#b91c1c;">*</span>
+            </label>
+            <input asp-for="Title" type="text"
+                   style="width:100%; padding:9px 12px; border:1px solid var(--qi-border);
+                          border-radius:8px; font-family:inherit;" />
+            <span asp-validation-for="Title" style="color:#b91c1c; font-size:12px;"></span>
+        </div>
+
+        <div style="grid-column:1/-1;">
+            <label asp-for="Description" style="display:block; font-size:13px; margin-bottom:6px; color:#4b5563; font-weight:500;">
+                توضیحات
+            </label>
+            <textarea asp-for="Description" rows="3"
+                      style="width:100%; padding:9px 12px; border:1px solid var(--qi-border);
+                             border-radius:8px; font-family:inherit; resize:vertical;"></textarea>
+        </div>
+
+        <div style="grid-column:1/-1; background:#f3f6f5; padding:12px; border-radius:8px;">
+            <label style="display:inline-flex; align-items:center; gap:8px; cursor:pointer;">
+                <input asp-for="IsOnline" type="checkbox" id="isOnlineChk"
+                       style="width:auto;" />
+                <span style="font-weight:500;">این جلسه آنلاین است</span>
+            </label>
+        </div>
+
+        <div style="grid-column:1/-1;" id="onlineLinkWrapper">
+            <label asp-for="OnlineLink" style="display:block; font-size:13px; margin-bottom:6px; color:#4b5563; font-weight:500;">
+                لینک جلسه آنلاین
+            </label>
+            <input asp-for="OnlineLink" type="url" dir="ltr"
+                   placeholder="https://meet.google.com/..."
+                   style="width:100%; padding:9px 12px; border:1px solid var(--qi-border);
+                          border-radius:8px; font-family:inherit;" />
+            <span asp-validation-for="OnlineLink" style="color:#b91c1c; font-size:12px;"></span>
+        </div>
+
+        <div style="grid-column:1/-1;">
+            <label asp-for="RecordingUrl" style="display:block; font-size:13px; margin-bottom:6px; color:#4b5563; font-weight:500;">
+                لینک فیلم ضبط‌شده (اختیاری)
+            </label>
+            <input asp-for="RecordingUrl" type="url" dir="ltr"
+                   placeholder="https://..."
+                   style="width:100%; padding:9px 12px; border:1px solid var(--qi-border);
+                          border-radius:8px; font-family:inherit;" />
+            <div style="font-size:11px; color:#6b7280; margin-top:4px;">
+                💡 می‌توانی لینک یوتیوب، آپارات یا فایل آپلودشده را اینجا بگذاری.
+            </div>
+        </div>
+    </div>
+
+    <div style="margin-top:24px; display:flex; gap:10px;">
+        <button type="submit" class="qi-btn">@submitLabel</button>
+        <a href="/Admin/Sessions?classId=@Model.ClassId" class="qi-btn gray">انصراف</a>
+    </div>
+</form>
+
+<script>
+    (function () {
+        var chk = document.getElementById('isOnlineChk');
+        var wrap = document.getElementById('onlineLinkWrapper');
+        if (chk && wrap) {
+            function toggle() { wrap.style.display = chk.checked ? '' : 'none'; }
+            chk.addEventListener('change', toggle);
+            toggle();
+        }
+    })();
+</script>

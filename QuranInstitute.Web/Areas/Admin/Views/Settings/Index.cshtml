@@ -1,0 +1,75 @@
+﻿@model QuranInstitute.Web.ViewModels.Settings.SettingsViewModel
+@{
+    ViewData["Title"] = "تنظیمات";
+}
+
+<div class="qi-card">
+    <h2>⚙️ تنظیمات موسسه</h2>
+
+    <form method="post" action="/Admin/Settings" novalidate>
+        @Html.AntiForgeryToken()
+
+        @if (!ViewData.ModelState.IsValid && ViewData.ModelState[""]?.Errors.Count > 0)
+        {
+            <div style="background:#fef2f2; border:1px solid #fecaca; color:#b91c1c;
+                            padding:10px 14px; border-radius:8px; margin-bottom:16px; font-size:13px;">
+                @ViewData.ModelState[""]!.Errors.First().ErrorMessage
+            </div>
+        }
+
+        <h3 style="color:var(--qi-primary-dark);">اطلاعات موسسه</h3>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(250px,1fr)); gap:16px; margin-bottom:20px;">
+
+            <div>
+                <label asp-for="InstituteName" style="display:block; font-size:13px; margin-bottom:6px; font-weight:500;">
+                    نام موسسه <span style="color:#b91c1c;">*</span>
+                </label>
+                <input asp-for="InstituteName" style="width:100%; padding:9px 12px; border:1px solid var(--qi-border); border-radius:8px; font-family:inherit;" />
+                <span asp-validation-for="InstituteName" style="color:#b91c1c; font-size:12px;"></span>
+            </div>
+
+            <div>
+                <label asp-for="Phone" style="display:block; font-size:13px; margin-bottom:6px; font-weight:500;">تلفن</label>
+                <input asp-for="Phone" dir="ltr" style="width:100%; padding:9px 12px; border:1px solid var(--qi-border); border-radius:8px; font-family:inherit;" />
+            </div>
+
+            <div>
+                <label asp-for="Email" style="display:block; font-size:13px; margin-bottom:6px; font-weight:500;">ایمیل</label>
+                <input asp-for="Email" type="email" dir="ltr" style="width:100%; padding:9px 12px; border:1px solid var(--qi-border); border-radius:8px; font-family:inherit;" />
+                <span asp-validation-for="Email" style="color:#b91c1c; font-size:12px;"></span>
+            </div>
+
+            <div style="grid-column:1/-1;">
+                <label asp-for="Address" style="display:block; font-size:13px; margin-bottom:6px; font-weight:500;">آدرس</label>
+                <input asp-for="Address" style="width:100%; padding:9px 12px; border:1px solid var(--qi-border); border-radius:8px; font-family:inherit;" />
+            </div>
+
+            <div style="grid-column:1/-1;">
+                <label asp-for="LogoUrl" style="display:block; font-size:13px; margin-bottom:6px; font-weight:500;">آدرس لوگو (URL)</label>
+                <input asp-for="LogoUrl" dir="ltr" placeholder="https://..." style="width:100%; padding:9px 12px; border:1px solid var(--qi-border); border-radius:8px; font-family:inherit;" />
+            </div>
+        </div>
+
+        <h3 style="color:var(--qi-primary-dark);">قالب پیام‌ها</h3>
+        <p style="font-size:12px; color:#6b7280; margin-bottom:12px;">
+            از متغیرهای زیر استفاده کنید: <code>{student}</code>، <code>{parent}</code>، <code>{class}</code>، <code>{date}</code>، <code>{amount}</code>، <code>{institute}</code>
+        </p>
+
+        <div style="margin-bottom:16px;">
+            <label asp-for="AbsentTemplate" style="display:block; font-size:13px; margin-bottom:6px; font-weight:500;">قالب پیام غیبت</label>
+            <textarea asp-for="AbsentTemplate" rows="3" style="width:100%; padding:9px 12px; border:1px solid var(--qi-border); border-radius:8px; font-family:inherit; resize:vertical;"></textarea>
+        </div>
+
+        <div style="margin-bottom:16px;">
+            <label asp-for="DebtTemplate" style="display:block; font-size:13px; margin-bottom:6px; font-weight:500;">قالب پیام بدهی</label>
+            <textarea asp-for="DebtTemplate" rows="3" style="width:100%; padding:9px 12px; border:1px solid var(--qi-border); border-radius:8px; font-family:inherit; resize:vertical;"></textarea>
+        </div>
+
+        <div style="margin-bottom:20px;">
+            <label asp-for="GeneralTemplate" style="display:block; font-size:13px; margin-bottom:6px; font-weight:500;">قالب اطلاعیه عمومی</label>
+            <textarea asp-for="GeneralTemplate" rows="3" style="width:100%; padding:9px 12px; border:1px solid var(--qi-border); border-radius:8px; font-family:inherit; resize:vertical;"></textarea>
+        </div>
+
+        <button type="submit" class="qi-btn">ذخیره تنظیمات</button>
+    </form>
+</div>

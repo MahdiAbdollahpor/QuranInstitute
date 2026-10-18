@@ -5,6 +5,7 @@ using QuranInstitute.Application.Common.Interfaces;
 using QuranInstitute.Application.Features.Tuition.Services;
 using QuranInstitute.Infrastructure.Persistence.Context;
 using QuranInstitute.Infrastructure.Services;
+using QuranInstitute.Infrastructure.Services.Backup;
 using QuranInstitute.Infrastructure.Services.FileStorage;
 using QuranInstitute.Infrastructure.Services.Sms;
 using QuranInstitute.Infrastructure.Services.Tuition;
@@ -31,8 +32,27 @@ public static class DependencyInjection
         services.AddScoped<IApplicationDbContext>(sp =>
             sp.GetRequiredService<ApplicationDbContext>());
 
+
+        services.Configure<RemoteFileStorageOptions>(
+    configuration.GetSection("FileStorage:Remote"));
+
+        services.AddHttpClient<RemoteFileStorageService>();
+        services.AddScoped<LocalFileStorageService>();
+
+        services.AddScoped<IFileStorageService>(sp =>
+        {
+            var active = configuration["FileStorage:Active"] ?? "Local";
+
+            return active == "Remote"
+                ? sp.GetRequiredService<RemoteFileStorageService>()
+                : sp.GetRequiredService<LocalFileStorageService>();
+        });
+
+        
+
         services.AddHttpContextAccessor();
 
+        services.AddScoped<IBackupService, BackupService>();
         services.AddScoped<ITuitionCalculator, TuitionCalculator>();
         services.AddScoped<IDateTimeService, DateTimeService>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();

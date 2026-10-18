@@ -1,0 +1,41 @@
+﻿@model QuranInstitute.Web.ViewModels.Reports.ReportsIndexViewModel
+@{
+    ViewData["Title"] = "گزارش‌ها";
+}
+
+<div class="qi-card">
+    <h2>📊 گزارش‌ها</h2>
+    <p style="color:var(--qi-text-muted);">
+        گزارش‌های تحلیلی موسسه در این بخش ارائه می‌شوند.
+    </p>
+</div>
+
+<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:16px;">
+    <div class="qi-card">
+        <h3 style="color:#0f766e; margin-top:0;">📅 گزارش حضور و غیاب</h3>
+        <p style="font-size:13px; color:#6b7280;">
+            مشاهده آمار حضور، غیبت، تأخیر و غیبت موجه برای هر شاگرد در ماه انتخابی.
+        </p>
+        <a href="/Admin/Reports/Attendance" class="qi-btn">مشاهده</a>
+    </div>
+
+    <div class="qi-card">
+        <h3 style="color:#0f766e; margin-top:0;">💰 گزارش مالی</h3>
+        <p style="font-size:13px; color:#6b7280;">
+            بررسی درآمد ماهانه به تفکیک روش پرداخت و ریز پرداخت‌های روزانه.
+        </p>
+        <a href="/Admin/Reports/Financial" class="qi-btn">مشاهده</a>
+    </div>
+
+    <div class="qi-card">
+        <h3 style="color:#0f766e; margin-top:0;">📥 خروجی Excel/CSV</h3>
+        <p style="font-size:13px; color:#6b7280;">
+            دانلود لیست شاگردان، پرداخت‌ها و حضور و غیاب به‌صورت فایل CSV (قابل باز شدن در Excel).
+        </p>
+        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <a href="/Admin/Reports/ExportStudentsCsv" class="qi-btn sm green">شاگردان</a>
+            <a href="/Admin/Reports/ExportPaymentsCsv" class="qi-btn sm blue">پرداخت‌ها</a>
+            <a href="/Admin/Reports/ExportAttendanceCsv" class="qi-btn sm gray">حضور</a>
+        </div>
+    </div>
+</div>

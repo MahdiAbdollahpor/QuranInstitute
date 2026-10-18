@@ -1,0 +1,16 @@
+﻿@model QuranInstitute.Web.ViewModels.Sessions.EditSessionViewModel
+@using QuranInstitute.Shared.Helpers
+@{
+    ViewData["Title"] = "ویرایش جلسه";
+    ViewBag.SubmitLabel = "ذخیره تغییرات";
+    ViewBag.FormAction = "/Admin/Sessions/Edit";
+}
+
+<div class="qi-card">
+    <h2>ویرایش جلسه @Model.SessionNumber — @Model.ClassName</h2>
+    <partial name="_SessionForm" model="Model" />
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
