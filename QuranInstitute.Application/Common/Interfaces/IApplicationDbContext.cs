@@ -28,6 +28,8 @@ public interface IApplicationDbContext
 
     DbSet<AppSettings> AppSettings { get; }
 
+    DbSet<SmsLog> SmsLogs { get; }
+
     Task<int> SaveChangesAsync(CancellationToken ct = default);
 
 

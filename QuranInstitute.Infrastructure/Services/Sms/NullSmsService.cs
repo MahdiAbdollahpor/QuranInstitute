@@ -4,10 +4,9 @@ using QuranInstitute.Application.Common.Interfaces;
 namespace QuranInstitute.Infrastructure.Services.Sms;
 
 /// <summary>
-/// پیاده‌سازی موقت که فقط لاگ می‌کند.
-/// بعداً با KavenegarSmsService جایگزین می‌شود.
+/// پیاده‌سازی Dry-Run — فقط لاگ می‌کند.
 /// </summary>
-public class NullSmsService : ISmsService
+public class NullSmsService : IRawSmsService
 {
     private readonly ILogger<NullSmsService> _logger;
 

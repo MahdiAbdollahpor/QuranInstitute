@@ -41,6 +41,8 @@ public class ApplicationDbContext
     public DbSet<Notification> Notifications => Set<Notification>();
     public DbSet<MessageTemplate> MessageTemplates => Set<MessageTemplate>();
 
+    public DbSet<SmsLog> SmsLogs => Set<SmsLog>();
+
     // ─── Configurations ────────────────────────────────
     protected override void OnModelCreating(ModelBuilder builder)
     {

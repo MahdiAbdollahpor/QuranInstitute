@@ -1,0 +1,105 @@
+﻿@model QuranInstitute.Web.ViewModels.Sms.AbsentSmsPreviewViewModel
+@using QuranInstitute.Shared.Helpers
+@{
+    ViewData["Title"] = "پیامک غیبت";
+}
+
+<div class="qi-card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h2>🚫 ارسال پیامک غیبت</h2>
+        <a href="/Admin/Sms" class="qi-btn gray">بازگشت</a>
+    </div>
+
+    <form method="get" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px;">
+        <div>
+            <label style="display:block; font-size:12px; margin-bottom:4px;">تاریخ</label>
+            <input type="text"
+                   class="persian-date-input"
+                   data-target="absentDateHidden"
+                   placeholder="1403/08/12"
+                   value="@Model.SelectedDate.GetShamsiDateFromGregorian(time: false)"
+                   autocomplete="off"
+                   inputmode="numeric"
+                   dir="ltr"
+                   style="padding:9px 12px; border:1px solid var(--qi-border); border-radius:8px; font-family:inherit; text-align:left;" />
+            <input type="hidden" name="date" id="absentDateHidden"
+                   value="@Model.SelectedDate.ToString("yyyy-MM-dd")" />
+        </div>
+
+        <div>
+            <label style="display:block; font-size:12px; margin-bottom:4px;">کلاس (اختیاری)</label>
+            <select name="classId"
+                    style="padding:9px 12px; border:1px solid var(--qi-border); border-radius:8px; font-family:inherit;">
+                <option value="">همه کلاس‌ها</option>
+                @foreach (var c in Model.Classes)
+                {
+                    <option value="@c.Value" selected="@c.Selected">@c.Text</option>
+                }
+            </select>
+        </div>
+
+        <button type="submit" class="qi-btn">نمایش</button>
+    </form>
+
+    <div style="background:#f3f6f5; padding:12px; border-radius:8px; margin-bottom:16px;
+                font-size:12px; color:#4b5563; white-space:pre-wrap;">
+        <b>قالب پیام:</b>
+        <div style="margin-top:4px;">@Model.Data.Template</div>
+    </div>
+
+    @if (!Model.Data.Recipients.Any())
+    {
+        <p style="color:var(--qi-text-muted); text-align:center; padding:30px;">
+            هیچ غایبی برای این تاریخ یافت نشد.
+        </p>
+    }
+    else
+    {
+        <form method="post" action="/Admin/Sms/SendAbsentSms">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="date" value="@Model.SelectedDate.ToString("yyyy-MM-dd")" />
+            @if (Model.ClassId.HasValue)
+            {
+                <input type="hidden" name="classId" value="@Model.ClassId" />
+            }
+
+            <div style="margin-bottom:12px;">
+                <button type="button" class="qi-btn sm gray" onclick="selectAllAbsent(true)">همه</button>
+                <button type="button" class="qi-btn sm gray" onclick="selectAllAbsent(false)">هیچ‌کدام</button>
+                <button type="submit" class="qi-btn sm green" style="margin-right:auto;">📤 ارسال به انتخاب‌شده‌ها</button>
+            </div>
+
+            <table style="width:100%; border-collapse:collapse;">
+                <thead>
+                    <tr style="background:#fef2f2; font-size:13px;">
+                        <th style="padding:8px; width:30px;"></th>
+                        <th style="padding:8px; text-align:right;">شاگرد</th>
+                        <th style="padding:8px; text-align:right;">ولی</th>
+                        <th style="padding:8px; text-align:right;">موبایل</th>
+                        <th style="padding:8px; text-align:right;">پیش‌نمایش پیام</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var r in Model.Data.Recipients)
+                    {
+                        <tr style="border-bottom:1px solid #e5eae9;">
+                            <td style="padding:8px; text-align:center;">
+                                <input type="checkbox" name="studentIds" value="@r.StudentId" class="absent-chk" checked />
+                            </td>
+                            <td style="padding:8px;"><strong>@r.StudentName</strong></td>
+                            <td style="padding:8px;">@r.ParentName</td>
+                            <td style="padding:8px; direction:ltr; text-align:right;">@r.Mobile.ToPersianDigits()</td>
+                            <td style="padding:8px; font-size:12px; color:#4b5563;">@r.RenderedMessage</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </form>
+    }
+</div>
+
+<script>
+    function selectAllAbsent(checked) {
+        document.querySelectorAll('.absent-chk').forEach(function (c) { c.checked = checked; });
+    }
+</script>

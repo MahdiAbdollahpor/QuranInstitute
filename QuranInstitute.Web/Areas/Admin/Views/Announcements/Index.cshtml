@@ -1,0 +1,82 @@
+﻿@model QuranInstitute.Web.ViewModels.Announcements.AnnouncementListViewModel
+@using QuranInstitute.Shared.Helpers
+@{
+    ViewData["Title"] = "اطلاعیه‌ها";
+}
+
+<div class="qi-card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h2>اطلاعیه‌ها (@Model.Announcements.TotalCount)</h2>
+        <a href="/Admin/Announcements/Create" class="qi-btn">+ اطلاعیه جدید</a>
+    </div>
+
+    <form method="get" style="display:flex; gap:10px; margin-bottom:16px;">
+        <input type="text" name="search" value="@Model.Search"
+               placeholder="جستجو…"
+               style="flex:1; padding:9px 12px; border:1px solid var(--qi-border); border-radius:8px; font-family:inherit;" />
+        <button type="submit" class="qi-btn">جستجو</button>
+        <a href="/Admin/Announcements" class="qi-btn gray">پاک‌کردن</a>
+    </form>
+
+    @if (!Model.Announcements.Items.Any())
+    {
+        <p style="color:var(--qi-text-muted); text-align:center; padding:30px;">هنوز اطلاعیه‌ای ارسال نشده است.</p>
+    }
+    else
+    {
+        <div style="display:flex; flex-direction:column; gap:10px;">
+            @foreach (var a in Model.Announcements.Items)
+            {
+                <div style="border:1px solid var(--qi-border); border-radius:10px; padding:14px;">
+                    <div style="display:flex; justify-content:space-between; align-items:start; gap:12px;">
+                        <div style="flex:1;">
+                            <div style="font-weight:700; font-size:15px;">@a.Title</div>
+                            <div style="font-size:13px; color:#4b5563; margin-top:6px;">
+                                @a.Body
+                            </div>
+
+                            <div style="display:flex; gap:14px; margin-top:8px; font-size:12px;">
+                                @if (a.SentInApp)
+                                {
+                                    <span style="color:#0f766e;">📱 درون‌برنامه</span>
+                                }
+                                @if (a.SentSms)
+                                {
+                                    <span style="color:#1d4ed8;">📧 SMS</span>
+                                }
+                                @if (a.SentWhatsApp)
+                                {
+                                    <span style="color:#16a34a;">💬 واتساپ</span>
+                                }
+                            </div>
+
+                            <div style="font-size:11px; color:var(--qi-text-muted); margin-top:8px;">
+                                @a.CreatedAt.GetShamsiDateFromGregorian(time: true).ToPersianDigits()
+                            </div>
+                        </div>
+
+                        <div style="display:flex; flex-direction:column; gap:6px;">
+                            <a href="/Admin/Announcements/Details/@a.Id" class="qi-btn sm">جزئیات</a>
+                            <form method="post" action="/Admin/Announcements/Delete/@a.Id" style="display:inline;"
+                                  onsubmit="return confirm('اطلاعیه حذف شود؟');">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="qi-btn sm red">حذف</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        @if (Model.Announcements.TotalPages > 1)
+        {
+            <div style="display:flex; gap:6px; justify-content:center; margin-top:20px;">
+                @for (int i = 1; i <= Model.Announcements.TotalPages; i++)
+                {
+                    <a href="?page=@i&search=@Model.Search"
+                       class="qi-btn sm @(i == Model.Announcements.Page ? "" : "gray")">@i.ToPersianDigits()</a>
+                }
+            </div>
+        }
+    }
+</div>

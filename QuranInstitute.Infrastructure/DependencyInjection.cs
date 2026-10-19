@@ -48,7 +48,26 @@ public static class DependencyInjection
                 : sp.GetRequiredService<LocalFileStorageService>();
         });
 
-        
+
+
+        // ─── SMS ───
+        services.Configure<KavenegarOptions>(configuration.GetSection("Sms:Kavenegar"));
+        services.AddHttpClient<KavenegarSmsService>();
+        services.AddScoped<NullSmsService>();
+
+        // سرویس خام (بدون لاگ) — بر اساس config
+        services.AddScoped<IRawSmsService>(sp =>
+        {
+            var active = configuration["Sms:Active"] ?? "Null";
+            return active == "Kavenegar"
+                ? sp.GetRequiredService<KavenegarSmsService>()
+                : sp.GetRequiredService<NullSmsService>();
+        });
+
+        // سرویس اصلی با لاگ — در همه Commandها از این استفاده کن
+        services.AddScoped<ISmsService, SmsServiceWithLogging>();
+
+
 
         services.AddHttpContextAccessor();
 
@@ -57,9 +76,9 @@ public static class DependencyInjection
         services.AddScoped<IDateTimeService, DateTimeService>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
         services.AddScoped<IFileStorageService, LocalFileStorageService>();
-        services.AddScoped<ISmsService, NullSmsService>();
         services.AddScoped<IWhatsAppService, WhatsAppLinkBuilder>();
         services.AddScoped<IIdentityService, IdentityService>();
+        services.AddScoped<ITemplateService, TemplateService>();
 
         return services;
     }

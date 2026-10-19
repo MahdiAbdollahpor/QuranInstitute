@@ -1,0 +1,209 @@
+﻿@model QuranInstitute.Web.ViewModels.Sms.SmsHistoryViewModel
+@using QuranInstitute.Shared.Helpers
+@using QuranInstitute.Domain.Enums
+@{
+    ViewData["Title"] = "تاریخچه پیامک‌ها";
+
+    var typeNames = new Dictionary<SmsType, string>
+    {
+        { SmsType.Absent, "غیبت" },
+        { SmsType.Debt, "بدهی" },
+        { SmsType.Announcement, "اطلاعیه" },
+        { SmsType.Manual, "دستی" },
+        { SmsType.Other, "سایر" }
+    };
+
+    var typeColors = new Dictionary<SmsType, string>
+    {
+        { SmsType.Absent, "#b91c1c" },
+        { SmsType.Debt, "#b45309" },
+        { SmsType.Announcement, "#0f766e" },
+        { SmsType.Manual, "#1d4ed8" },
+        { SmsType.Other, "#6b7280" }
+    };
+
+    var statusNames = new Dictionary<SmsStatus, string>
+    {
+        { SmsStatus.Pending, "در انتظار" },
+        { SmsStatus.Sent, "ارسال‌شده" },
+        { SmsStatus.Failed, "ناموفق" },
+        { SmsStatus.Delivered, "تحویل‌شده" }
+    };
+
+    var statusColors = new Dictionary<SmsStatus, string>
+    {
+        { SmsStatus.Pending, "#b45309" },
+        { SmsStatus.Sent, "#16a34a" },
+        { SmsStatus.Failed, "#b91c1c" },
+        { SmsStatus.Delivered, "#0f766e" }
+    };
+}
+
+<div class="qi-card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h2>📧 تاریخچه پیامک‌ها</h2>
+        <a href="/Admin/Sms" class="qi-btn gray">بازگشت</a>
+    </div>
+
+    @* ─── آمار ─── *@
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(150px,1fr)); gap:12px; margin-bottom:20px;">
+        <div style="background:#f0fdf4; padding:12px; border-radius:10px;">
+            <div style="font-size:12px; color:#166534;">ارسال موفق</div>
+            <div style="font-size:20px; font-weight:700; color:#16a34a;">
+                @Model.Stats.TotalSent.ToPersianDigits()
+            </div>
+        </div>
+
+        <div style="background:#eff6ff; padding:12px; border-radius:10px;">
+            <div style="font-size:12px; color:#1e40af;">این ماه</div>
+            <div style="font-size:20px; font-weight:700; color:#1d4ed8;">
+                @Model.Stats.SentThisMonth.ToPersianDigits()
+            </div>
+        </div>
+
+        <div style="background:#fef2f2; padding:12px; border-radius:10px;">
+            <div style="font-size:12px; color:#991b1b;">ناموفق (این ماه)</div>
+            <div style="font-size:20px; font-weight:700; color:#b91c1c;">
+                @Model.Stats.FailedThisMonth.ToPersianDigits()
+            </div>
+        </div>
+
+        <div style="background:#fef3c7; padding:12px; border-radius:10px;">
+            <div style="font-size:12px; color:#92400e;">غیبت</div>
+            <div style="font-size:20px; font-weight:700; color:#b45309;">
+                @Model.Stats.AbsentCount.ToPersianDigits()
+            </div>
+        </div>
+
+        <div style="background:#f3f6f5; padding:12px; border-radius:10px;">
+            <div style="font-size:12px; color:var(--qi-text-muted);">بدهی</div>
+            <div style="font-size:20px; font-weight:700;">
+                @Model.Stats.DebtCount.ToPersianDigits()
+            </div>
+        </div>
+
+        <div style="background:#f3f6f5; padding:12px; border-radius:10px;">
+            <div style="font-size:12px; color:var(--qi-text-muted);">اطلاعیه</div>
+            <div style="font-size:20px; font-weight:700;">
+                @Model.Stats.AnnouncementCount.ToPersianDigits()
+            </div>
+        </div>
+    </div>
+
+    @* ─── فیلترها ─── *@
+    <form method="get" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;">
+        <input type="text" name="search" value="@Model.Search"
+               placeholder="جستجو (موبایل، متن، نام)…"
+               style="flex:1; min-width:200px; padding:9px 12px; border:1px solid var(--qi-border);
+                      border-radius:8px; font-family:inherit;" />
+
+        <select name="type"
+                style="padding:9px 12px; border:1px solid var(--qi-border); border-radius:8px; font-family:inherit;">
+            @foreach (var t in Model.TypeOptions)
+            {
+                <option value="@t.Value" selected="@t.Selected">@t.Text</option>
+            }
+        </select>
+
+        <select name="status"
+                style="padding:9px 12px; border:1px solid var(--qi-border); border-radius:8px; font-family:inherit;">
+            @foreach (var s in Model.StatusOptions)
+            {
+                <option value="@s.Value" selected="@s.Selected">@s.Text</option>
+            }
+        </select>
+
+        <button type="submit" class="qi-btn">فیلتر</button>
+        <a href="/Admin/Sms/History" class="qi-btn gray">پاک‌کردن</a>
+    </form>
+
+    @* ─── جدول ─── *@
+    @if (!Model.Logs.Items.Any())
+    {
+        <p style="color:var(--qi-text-muted); text-align:center; padding:40px;">
+            هنوز پیامکی ارسال نشده است.
+        </p>
+    }
+    else
+    {
+        <div style="overflow-x:auto;">
+            <table style="width:100%; border-collapse:collapse;">
+                <thead>
+                    <tr style="background:#eef3f2; font-size:13px;">
+                        <th style="padding:10px; text-align:right;">تاریخ</th>
+                        <th style="padding:10px; text-align:right;">گیرنده</th>
+                        <th style="padding:10px; text-align:right;">موبایل</th>
+                        <th style="padding:10px; text-align:right;">نوع</th>
+                        <th style="padding:10px; text-align:right;">وضعیت</th>
+                        <th style="padding:10px; text-align:right;">متن پیام</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var log in Model.Logs.Items)
+                    {
+                        <tr style="border-bottom:1px solid #e5eae9;">
+                            <td style="padding:10px; font-size:13px;">
+                                @log.CreatedAt.GetShamsiDateFromGregorian(time: true).ToPersianDigits()
+                            </td>
+                            <td style="padding:10px;">
+                                @if (!string.IsNullOrEmpty(log.RecipientName))
+                                {
+                                    <strong>@log.RecipientName</strong>
+                                    @if (!string.IsNullOrEmpty(log.StudentName))
+                                    {
+                                        <div style="font-size:11px; color:var(--qi-text-muted);">
+                                            شاگرد: @log.StudentName
+                                        </div>
+                                    }
+                                }
+                                else if (!string.IsNullOrEmpty(log.StudentName))
+                                {
+                                    <span>شاگرد: @log.StudentName</span>
+                                }
+                                else
+                                {
+                                    <span style="color:var(--qi-text-muted);">—</span>
+                                }
+                            </td>
+                            <td style="padding:10px; direction:ltr; text-align:right;">
+                                @log.Mobile.ToPersianDigits()
+                            </td>
+                            <td style="padding:10px;">
+                                <span style="background:@(typeColors.ContainsKey(log.Type) ? typeColors[log.Type] : "#6b7280");
+                                                     color:#fff; padding:3px 10px; border-radius:20px; font-size:11px;">
+                                    @(typeNames.ContainsKey(log.Type) ? typeNames[log.Type] : "—")
+                                </span>
+                            </td>
+                            <td style="padding:10px;">
+                                <span style="color:@(statusColors.ContainsKey(log.Status) ? statusColors[log.Status] : "#6b7280");
+                                                     font-weight:700; font-size:12px;">
+                                    @(statusNames.ContainsKey(log.Status) ? statusNames[log.Status] : "—")
+                                </span>
+                                @if (!string.IsNullOrEmpty(log.ErrorMessage))
+                                {
+                                    <div style="font-size:11px; color:#b91c1c; margin-top:2px;">
+                                        @log.ErrorMessage
+                                    </div>
+                                }
+                            </td>
+                            <td style="padding:10px; font-size:12px; color:#4b5563; max-width:400px;">
+                                @(log.Message.Length > 100 ? log.Message.Substring(0, 100) + "…" : log.Message)
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (Model.Logs.TotalPages > 1)
+        {
+            <div style="display:flex; gap:6px; justify-content:center; margin-top:20px;">
+                @for (int i = 1; i <= Model.Logs.TotalPages; i++)
+                {
+                    <a href="?page=@i&search=@Model.Search&type=@((int?)Model.Type)&status=@((int?)Model.Status)"
+                       class="qi-btn sm @(i == Model.Logs.Page ? "" : "gray")">@i.ToPersianDigits()</a>
+                }
+            </div>
+        }
+    }
+</div>

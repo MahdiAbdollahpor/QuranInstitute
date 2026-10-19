@@ -1,0 +1,71 @@
+﻿@model QuranInstitute.Application.Features.Notifications.Queries.GetAnnouncementById.AnnouncementDetailDto
+@using QuranInstitute.Shared.Helpers
+@{
+    ViewData["Title"] = "جزئیات اطلاعیه";
+}
+
+<div class="qi-card">
+    <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:16px;">
+        <h2 style="margin:0;">@Model.Title</h2>
+        <a href="/Admin/Announcements" class="qi-btn gray">بازگشت</a>
+    </div>
+
+    <div style="background:#f3f6f5; padding:16px; border-radius:10px; margin-bottom:16px;
+                line-height:1.8; white-space:pre-wrap;">
+        @Model.Body
+    </div>
+
+    <table style="width:100%; border-collapse:collapse;">
+        <tr style="border-bottom:1px solid #e5eae9;">
+            <td style="padding:8px; color:var(--qi-text-muted); width:150px;">گیرنده:</td>
+            <td style="padding:8px;">
+                @if (Model.TargetStudentId.HasValue)
+                {
+                    <span>👤 شاگرد: @Model.TargetStudentName</span>
+                }
+                else if (Model.TargetClassId.HasValue)
+                {
+                    <span>📚 کلاس: @Model.TargetClassName</span>
+                }
+                else
+                {
+                    <span>همه شاگردان</span>
+                }
+            </td>
+        </tr>
+        <tr style="border-bottom:1px solid #e5eae9;">
+            <td style="padding:8px; color:var(--qi-text-muted);">کانال‌ها:</td>
+            <td style="padding:8px; display:flex; gap:10px;">
+                @if (Model.SentInApp)
+                {
+                    <span>📱 درون‌برنامه</span>
+                }
+                @if (Model.SentSms)
+                {
+                    <span>📧 SMS</span>
+                }
+                @if (Model.SentWhatsApp)
+                {
+                    <span>💬 واتساپ</span>
+                }
+            </td>
+        </tr>
+        <tr style="border-bottom:1px solid #e5eae9;">
+            <td style="padding:8px; color:var(--qi-text-muted);">تاریخ ارسال:</td>
+            <td style="padding:8px;">
+                @if (Model.SentAt.HasValue)
+                {
+                    @Model.SentAt.Value.GetShamsiDateFromGregorian(time: true).ToPersianDigits()
+                }
+                else
+                {
+                    <span style="color:#b45309;">ارسال نشده</span>
+                }
+            </td>
+        </tr>
+        <tr>
+            <td style="padding:8px; color:var(--qi-text-muted);">تاریخ ساخت:</td>
+            <td style="padding:8px;">@Model.CreatedAt.GetShamsiDateFromGregorian(time: true).ToPersianDigits()</td>
+        </tr>
+    </table>
+</div>

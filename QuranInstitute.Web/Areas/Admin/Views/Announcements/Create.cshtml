@@ -1,0 +1,82 @@
+﻿@model QuranInstitute.Web.ViewModels.Announcements.CreateAnnouncementViewModel
+@{
+    ViewData["Title"] = "اطلاعیه جدید";
+}
+
+<div class="qi-card">
+    <h2>📢 ارسال اطلاعیه جدید</h2>
+
+    <form method="post" action="/Admin/Announcements/Create" novalidate>
+        @Html.AntiForgeryToken()
+
+        @if (!ViewData.ModelState.IsValid && ViewData.ModelState[""]?.Errors.Count > 0)
+        {
+            <div style="background:#fef2f2; border:1px solid #fecaca; color:#b91c1c;
+                            padding:10px 14px; border-radius:8px; margin-bottom:16px; font-size:13px;">
+                @ViewData.ModelState[""]!.Errors.First().ErrorMessage
+            </div>
+        }
+
+        <div style="margin-bottom:14px;">
+            <label asp-for="Title" style="display:block; font-size:13px; margin-bottom:6px; font-weight:500;">
+                عنوان <span style="color:#b91c1c;">*</span>
+            </label>
+            <input asp-for="Title" style="width:100%; padding:9px 12px; border:1px solid var(--qi-border); border-radius:8px; font-family:inherit;" />
+            <span asp-validation-for="Title" style="color:#b91c1c; font-size:12px;"></span>
+        </div>
+
+        <div style="margin-bottom:14px;">
+            <label asp-for="Body" style="display:block; font-size:13px; margin-bottom:6px; font-weight:500;">
+                متن پیام <span style="color:#b91c1c;">*</span>
+            </label>
+            <textarea asp-for="Body" rows="5"
+                      style="width:100%; padding:9px 12px; border:1px solid var(--qi-border); border-radius:8px; font-family:inherit; resize:vertical;"></textarea>
+            <span asp-validation-for="Body" style="color:#b91c1c; font-size:12px;"></span>
+        </div>
+
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:14px; margin-bottom:14px;">
+            <div>
+                <label asp-for="TargetClassId" style="display:block; font-size:13px; margin-bottom:6px; font-weight:500;">
+                    کلاس هدف (اختیاری)
+                </label>
+                <select asp-for="TargetClassId" asp-items="Model.Classes"
+                        style="width:100%; padding:9px 12px; border:1px solid var(--qi-border); border-radius:8px; font-family:inherit;">
+                    <option value="">— همه کلاس‌ها —</option>
+                </select>
+            </div>
+
+            <div>
+                <label asp-for="TargetStudentId" style="display:block; font-size:13px; margin-bottom:6px; font-weight:500;">
+                    شاگرد خاص (اختیاری)
+                </label>
+                <select asp-for="TargetStudentId" asp-items="Model.Students"
+                        style="width:100%; padding:9px 12px; border:1px solid var(--qi-border); border-radius:8px; font-family:inherit;">
+                    <option value="">— همه شاگردان —</option>
+                </select>
+            </div>
+        </div>
+
+        <div style="background:#f3f6f5; padding:14px; border-radius:8px; margin-bottom:14px;">
+            <div style="font-size:13px; font-weight:500; margin-bottom:10px;">کانال‌های ارسال:</div>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+                <label style="display:inline-flex; align-items:center; gap:8px; cursor:pointer;">
+                    <input asp-for="SendInApp" type="checkbox" />
+                    <span>📱 درون‌برنامه (صندوق پیام کاربر)</span>
+                </label>
+                <label style="display:inline-flex; align-items:center; gap:8px; cursor:pointer;">
+                    <input asp-for="SendSms" type="checkbox" />
+                    <span>📧 پیامک (SMS به والدین)</span>
+                </label>
+                <label style="display:inline-flex; align-items:center; gap:8px; cursor:pointer;">
+                    <input asp-for="SendWhatsApp" type="checkbox" />
+                    <span>💬 واتساپ (فعلاً فقط در لیست نمایش داده می‌شود)</span>
+                </label>
+            </div>
+        </div>
+
+        <div style="display:flex; gap:10px;">
+            <button type="submit" class="qi-btn">📤 ارسال اطلاعیه</button>
+            <a href="/Admin/Announcements" class="qi-btn gray">انصراف</a>
+        </div>
+    </form>
+</div>
